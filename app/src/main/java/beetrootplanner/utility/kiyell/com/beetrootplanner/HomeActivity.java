@@ -26,6 +26,8 @@ public class HomeActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        DBAdapter db = new DBAdapter(this);
     }
 
     @Override
