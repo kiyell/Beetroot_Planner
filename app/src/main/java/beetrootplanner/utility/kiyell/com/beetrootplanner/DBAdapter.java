@@ -63,6 +63,28 @@ public class DBAdapter {
     {
         DBHelper.close();
     }
+
+    //-- Insert Term Data
+    public boolean addTerm(String ttl, String st, String ed)
+    {
+        return false;
+    }
+    //-- Update Term Data
+    public boolean updateTerm(long rowid, String ttl, String st, String ed)
+    {
+        return false;
+    }
+    //-- Delete Term Data
+    public boolean deleteTerm(long rowid)
+    {
+        return false;
+    }
+    //-- Retrieve Term Data
+    public Cursor getAllTerms()
+    {
+        return null;
+    }
+
     //---insert a contact into the database---
     public long insertContact(String name, String email)
     {
