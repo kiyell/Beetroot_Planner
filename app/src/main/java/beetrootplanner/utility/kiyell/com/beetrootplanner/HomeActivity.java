@@ -1,5 +1,7 @@
 package beetrootplanner.utility.kiyell.com.beetrootplanner;
 
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -27,7 +30,22 @@ public class HomeActivity extends AppCompatActivity {
             }
         }); */
 
-        DBAdapter db = new DBAdapter(this);
+
+    }
+
+    public void DisplayTerm(Cursor c)
+    {
+        Toast.makeText(this,
+                "term_id: " + c.getString(0) + "\n" +
+                        "term_title: " + c.getString(1) + "\n" +
+                        "term_start: " + c.getString(2) + "\n" +
+                        "term_end: " + c.getString(3),
+                Toast.LENGTH_LONG).show();
+    }
+
+    public void startListActivity(View v) {
+        Intent intent = new Intent(this, DisplayListActivity.class);
+        startActivity(intent);
     }
 
     @Override

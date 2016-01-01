@@ -18,8 +18,10 @@ public class DBAdapter {
     static final String DATABASE_TABLE = "contacts";
     static final int DATABASE_VERSION = 1;
     static final String DATABASE_CREATE =
-    "create table contacts (_id integer primary key autoincrement, "
-            + "name text not null, email text not null);";
+            "create table terms (term_id integer primary key autoincrement, term_title text not null, term_start text not null, term_end text not null);" +
+                    "";
+    /*"create table contacts (_id integer primary key autoincrement, "
+            + "name text not null, email text not null);";*/
     final Context context;
     DatabaseHelper DBHelper;
     SQLiteDatabase db;
@@ -65,9 +67,13 @@ public class DBAdapter {
     }
 
     //-- Insert Term Data
-    public boolean addTerm(String ttl, String st, String ed)
+    public long addTerm(String ttl, String st, String ed)
     {
-        return false;
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("term_title", ttl);
+        initialValues.put("term_start", st);
+        initialValues.put("term_end", ed);
+        return db.insert("terms", null, initialValues);
     }
     //-- Update Term Data
     public boolean updateTerm(long rowid, String ttl, String st, String ed)
@@ -82,7 +88,9 @@ public class DBAdapter {
     //-- Retrieve Term Data
     public Cursor getAllTerms()
     {
-        return null;
+        return db.query("terms", new String[] {"term_id", "term_title",
+                "term_start", "term_end"}, null, null, null, null, null);
+
     }
 
     //---insert a contact into the database---
