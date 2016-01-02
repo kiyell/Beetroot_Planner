@@ -12,18 +12,27 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Term"
+            android:text="Add"
             android:id="@+id/button_add"
-            android:layout_weight=".5"
+            android:layout_weight=".33"
             android:onClick="addData" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete Term"
+            android:text="Delete"
             android:id="@+id/button_delete"
-            android:layout_weight=".5"
+            android:layout_weight=".33"
             android:onClick="deleteData"
+            android:nestedScrollingEnabled="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
+            android:id="@+id/button_edit"
+            android:layout_weight=".33"
+            android:onClick="editData"
             android:nestedScrollingEnabled="true" />
     </LinearLayout>
 
