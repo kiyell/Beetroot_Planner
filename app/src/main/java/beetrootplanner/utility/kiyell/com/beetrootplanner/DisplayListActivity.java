@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -29,10 +30,11 @@ public class DisplayListActivity extends ListActivity {
     DBAdapter db;
 
     static int VIEW_MODE = 0;
-    static int ADD_MODE = 1;
     static int DELETE_MODE = 2;
     static int EDIT_MODE = 3;
     int currentMode;
+    String dataTitle;
+    String dataPk;
 
     AlertDialog dialog;
 
@@ -48,9 +50,12 @@ public class DisplayListActivity extends ListActivity {
         tView.setText("Displaying Term data");
         getListView().addHeaderView(tView);
 
+        dataTitle = getIntent().getStringExtra("ttl");
+        dataPk = getIntent().getStringExtra("pk");
+
 
         queryDatabase();
-        populateList();
+   //     populateList();
 
 
 
@@ -64,7 +69,7 @@ public class DisplayListActivity extends ListActivity {
       //  long term_id = db.addTerm("Term 1", "July 1st", "August 1st");
 
         Cursor c = db.getAllTerms();
-        results.clear();
+      //  results.clear();
         dblist.clear();
         if (c.moveToFirst())
         {
@@ -74,9 +79,18 @@ public class DisplayListActivity extends ListActivity {
             } while (c.moveToNext());
         }
         db.close();
+
+        ArrayAdapter la = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1);
+        // la.add("hello");
+
+        for (DBListEntry item : dblist) {
+            la.add(item);
+        }
+        setListAdapter(la);
     }
 
-    private void populateList() {
+    private void populxateList() {
 
         ArrayAdapter la = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1);
@@ -101,74 +115,87 @@ public class DisplayListActivity extends ListActivity {
 
     public void addData(View v) {
 
-        if(currentMode == DELETE_MODE) {
+        if(currentMode == DELETE_MODE || currentMode == EDIT_MODE) {
             setMode(VIEW_MODE);
         } else {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-            LayoutInflater inflater = this.getLayoutInflater();
-
-            // Inflate and set the layout for the dialog
-            // Pass null as the parent view because its going in the dialog layout
-            builder.setView(inflater.inflate(R.layout.dialog_add_term, null));
-
-            // Add the buttons
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // User clicked OK button
-                    Dialog d = (Dialog) dialog;
-                    EditText termTitle,termStart,termEnd;
-                    termTitle = (EditText) d.findViewById(R.id.term_title);
-                    termStart = (EditText) d.findViewById(R.id.term_start);
-                    termEnd = (EditText) d.findViewById(R.id.term_end);
-
-                    StringBuilder output = new StringBuilder();
-                    output.append(termTitle.getText()+ " ");
-                    output.append(termStart.getText()+ " ");
-                    output.append(termEnd.getText()+ " ");
-
-                    Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
-                    db.open();
-                    long term_id = db.addTerm(termTitle.getText().toString(), termStart.getText().toString(), termEnd.getText().toString());
-                    db.close();
-                    queryDatabase();
-                    populateList();
-                }
-            });
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // User cancelled the dialog
-                }
-            });
+            switch (dataTitle) {
+                case "terms": buildTerms();
+                    break;
+                case "Courses":
+                    break;
+                case "Assessments":
+                    break;
+                case "Mentors":
+                    break;
+            }
 
 
-            builder.setMessage("Add a new Term")
-                    .setTitle("Add Term");
-
-
-            dialog = builder.create();
-
-            dialog.show();
         }
 
     }
 
+    public void buildTerms() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        builder.setView(inflater.inflate(R.layout.dialog_add_term, null));
+
+        // Add the buttons
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText termTitle, termStart, termEnd;
+                termTitle = (EditText) d.findViewById(R.id.term_title);
+                termStart = (EditText) d.findViewById(R.id.term_start);
+                termEnd = (EditText) d.findViewById(R.id.term_end);
+
+                StringBuilder output = new StringBuilder();
+                output.append(termTitle.getText() + " ");
+                output.append(termStart.getText() + " ");
+                output.append(termEnd.getText() + " ");
+
+                Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long term_id = db.addTerm(termTitle.getText().toString(), termStart.getText().toString(), termEnd.getText().toString());
+                db.close();
+                queryDatabase();
+                //      populateList();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+        builder.setMessage("Add a new Term")
+                .setTitle("Add Term");
+
+        dialog = builder.create();
+        dialog.show();
+    }
+
     public void deleteData(View v) {
-        if (currentMode == DELETE_MODE) {
-        // Alreadying in delete mode, time to delete specific data
-        }else
-        setMode(DELETE_MODE);
+
+     //       Intent intent = new Intent(this, DisplayListActivity.class);
+     //       startActivity(intent);
+            setMode(DELETE_MODE);
     }
 
     public void editData(View v) {
-
+        setMode(EDIT_MODE);
     }
 
     public void setMode(int mode) {
         currentMode = mode;
 
-        if(mode == DELETE_MODE) {
+        if(mode == DELETE_MODE || mode == EDIT_MODE) {
             //change button to Confirm delete
             //Change layout
             Button deleteButton = (Button) findViewById(R.id.button_delete);
@@ -180,11 +207,7 @@ public class DisplayListActivity extends ListActivity {
             editButton.setEnabled(false);
 
             Button cancelButton = (Button) findViewById(R.id.button_add);
-            cancelButton.setText("Cancel");
-
-            setListAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.simple_list_item_checked, results));
-            getListView().setTextFilterEnabled(true);
+            cancelButton.setText("Done");
         }
         if(mode == VIEW_MODE) {
             Button deleteButton = (Button) findViewById(R.id.button_delete);
@@ -197,11 +220,6 @@ public class DisplayListActivity extends ListActivity {
 
             Button addButton = (Button) findViewById(R.id.button_add);
             addButton.setText("Add Term");
-
-
-            setListAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.simple_list_item_1, results));
-            getListView().setTextFilterEnabled(true);
         }
     }
 
@@ -220,6 +238,12 @@ public class DisplayListActivity extends ListActivity {
         if (currentMode == DELETE_MODE) {
             //Delete the entry
            // processDelete();
+            db.open();
+            db.delete("terms", "term_id", e.rowid);
+            db.close();
+
+            queryDatabase();
+   //         populateList();
         }
 
      //   getListAdapter().

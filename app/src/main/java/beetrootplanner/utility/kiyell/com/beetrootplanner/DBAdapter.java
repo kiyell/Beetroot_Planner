@@ -75,6 +75,10 @@ public class DBAdapter {
         initialValues.put("term_end", ed);
         return db.insert("terms", null, initialValues);
     }
+
+    public void delete(String table,String pk, long rowId) {
+        db.delete(table,pk + "=" + rowId, null);
+    }
     //-- Update Term Data
     public boolean updateTerm(long rowid, String ttl, String st, String ed)
     {

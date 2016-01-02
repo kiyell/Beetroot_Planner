@@ -45,6 +45,8 @@ public class HomeActivity extends AppCompatActivity {
 
     public void startListActivity(View v) {
         Intent intent = new Intent(this, DisplayListActivity.class);
+        intent.putExtra("ttl","terms");
+        intent.putExtra("pk","term_id");
         startActivity(intent);
     }
 
