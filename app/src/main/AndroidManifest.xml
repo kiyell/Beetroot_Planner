@@ -20,7 +20,6 @@
         </activity>
         <activity android:name=".DetailActivity" />
         <activity android:name=".DisplayListActivity" />
-        <activity android:name=".DisplayListActivity"></activity>
     </application>
 
 </manifest>
