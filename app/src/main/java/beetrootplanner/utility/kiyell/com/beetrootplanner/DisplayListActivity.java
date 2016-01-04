@@ -7,15 +7,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,9 +31,12 @@ public class DisplayListActivity extends ListActivity {
     static int EDIT_MODE = 3;
     int currentMode;
     String dataTitle;
-    String dataPk;
+    String wherePK;
+    String whereValue;
 
     AlertDialog dialog;
+    Intent nextPage;
+    String[] intentExt;
 
 
     @Override
@@ -46,43 +46,57 @@ public class DisplayListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.display_list);
         db = new DBAdapter(this);
+
+        dataTitle= getIntent().getStringExtra("table");
+        wherePK = getIntent().getStringExtra("where_pk");
+        whereValue = getIntent().getStringExtra("where_value");
+
         TextView tView = new TextView(this);
-        tView.setText("Displaying Term data");
+        tView.setText("Displaying " + dataTitle + getIntent().getStringExtra("header_sub")+whereValue);
+        tView.setOnClickListener(null);
         getListView().addHeaderView(tView);
 
-        dataTitle = getIntent().getStringExtra("ttl");
-        dataPk = getIntent().getStringExtra("pk");
 
 
-        queryDatabase();
-   //     populateList();
+
+        currentMode = VIEW_MODE;
+        populateListFromSql();
+
 
 
 
     }
 
-    private void queryDatabase() {
+    private void populateListFromSql() {
 
-
-        //---add a contact---
         db.open();
-      //  long term_id = db.addTerm("Term 1", "July 1st", "August 1st");
 
-        Cursor c = db.getAllTerms();
-      //  results.clear();
+        Cursor c = null;
+
+        switch (dataTitle) {
+            case "terms": c = db.getAllTerms();
+                break;
+            case "courses": c = db.getSubset(dataTitle,whereValue);
+                break;
+            case "assessments": //retrieveAssessments(where_pk);
+                break;
+            case "mentors": //retrieveMentors(where_pk);
+                break;
+        }
+
+
+
         dblist.clear();
         if (c.moveToFirst())
         {
             do {
                 dblist.add(new DBListEntry(c.getString(1)+" : "+c.getString(2)+" - "+c.getString(3),c.getLong(0)));
-              //  results.add("("+c.getString(0)+") "+c.getString(1)+" : "+c.getString(2)+" - "+c.getString(3));
             } while (c.moveToNext());
         }
         db.close();
 
         ArrayAdapter la = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1);
-        // la.add("hello");
 
         for (DBListEntry item : dblist) {
             la.add(item);
@@ -90,28 +104,8 @@ public class DisplayListActivity extends ListActivity {
         setListAdapter(la);
     }
 
-    private void populxateList() {
-
-        ArrayAdapter la = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1);
-       // la.add("hello");
-
-        for (DBListEntry item : dblist) {
-            la.add(item);
-        }
-        setListAdapter(la);
 
 
-       // getListView().setTextFilterEnabled(true);
-       // getListView().addView();
-        //android.R.layout.simple_list_item_1
-    }
-
-    public void populateDeleteList(View v) {
-        setListAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_checked, results));
-      //  getListView().setTextFilterEnabled(true);
-    }
 
     public void addData(View v) {
 
@@ -121,13 +115,13 @@ public class DisplayListActivity extends ListActivity {
 
 
             switch (dataTitle) {
-                case "terms": buildTerms();
+                case "terms": buildTermAdder();
                     break;
-                case "Courses":
+                case "courses": buildCourseAdder();
                     break;
-                case "Assessments":
+                case "assessments":
                     break;
-                case "Mentors":
+                case "mentors":
                     break;
             }
 
@@ -136,17 +130,14 @@ public class DisplayListActivity extends ListActivity {
 
     }
 
-    public void buildTerms() {
+    public void buildTermAdder() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         LayoutInflater inflater = this.getLayoutInflater();
 
-        // Inflate and set the layout for the dialog
-        // Pass null as the parent view because its going in the dialog layout
         builder.setView(inflater.inflate(R.layout.dialog_add_term, null));
 
-        // Add the buttons
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
@@ -165,8 +156,7 @@ public class DisplayListActivity extends ListActivity {
                 db.open();
                 long term_id = db.addTerm(termTitle.getText().toString(), termStart.getText().toString(), termEnd.getText().toString());
                 db.close();
-                queryDatabase();
-                //      populateList();
+                populateListFromSql();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -176,7 +166,133 @@ public class DisplayListActivity extends ListActivity {
         });
         builder.setMessage("Add a new Term")
                 .setTitle("Add Term");
+        dialog = builder.create();
+        dialog.show();
+    }
 
+    public void buildTermEditer(String wh) {
+        final String where = wh;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        View v = inflater.inflate(R.layout.dialog_add_term, null);
+        EditText termTitle, termStart, termEnd;
+
+        termTitle = (EditText) v.findViewById(R.id.term_title);
+        termStart = (EditText) v.findViewById(R.id.term_start);
+        termEnd = (EditText) v.findViewById(R.id.term_end);
+
+        db.open();
+        Cursor result = db.getRow("terms",where);
+
+
+            if (result.moveToFirst()) {
+                termTitle.setText(result.getString(1));
+                termStart.setText(result.getString(2));
+                termEnd.setText(result.getString(3));
+            }
+
+        db.close();
+
+
+        builder.setView(v);
+
+
+
+        //Dialog d = (Dialog) dialog;
+
+
+
+
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+
+
+                Dialog d = (Dialog) dialog;
+                EditText termTitle, termStart, termEnd;
+                termTitle = (EditText) d.findViewById(R.id.term_title);
+                termStart = (EditText) d.findViewById(R.id.term_start);
+                termEnd = (EditText) d.findViewById(R.id.term_end);
+
+                db.open();
+                db.getRow("terms",where);
+                db.close();
+
+
+
+
+                StringBuilder output = new StringBuilder();
+                output.append(termTitle.getText() + " ");
+                output.append(termStart.getText() + " ");
+                output.append(termEnd.getText() + " ");
+
+                Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
+
+                db.open();
+                long term_id = db.updateTerm(termTitle.getText().toString(), termStart.getText().toString(), termEnd.getText().toString(), where);
+                db.close();
+                populateListFromSql();
+                setMode(VIEW_MODE);
+
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                setMode(VIEW_MODE);
+            }
+        });
+        builder.setMessage("Edit a Term")
+                .setTitle("Edit Term");
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    public void buildCourseAdder() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        builder.setView(inflater.inflate(R.layout.dialog_add_course, null));
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText courseTitle, courseStart, courseEnd, courseStatus;
+                courseTitle = (EditText) d.findViewById(R.id.course_title);
+                courseStart = (EditText) d.findViewById(R.id.course_start);
+                courseEnd = (EditText) d.findViewById(R.id.course_end);
+                courseStatus = (EditText) d.findViewById(R.id.course_status);
+
+                StringBuilder output = new StringBuilder();
+                output.append(courseTitle.getText() + " ");
+                output.append(courseStart.getText() + " ");
+                output.append(courseEnd.getText() + " ");
+                output.append(courseStatus.getText() + " ");
+                output.append(" WHERE value is " + whereValue);
+
+
+                Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long term_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), whereValue);
+                Toast.makeText(d.getContext(), "term_id created is: " + term_id, Toast.LENGTH_LONG).show();
+                db.close();
+                populateListFromSql();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+        builder.setMessage("Add a new Course")
+                .setTitle("Add Course");
         dialog = builder.create();
         dialog.show();
     }
@@ -229,24 +345,41 @@ public class DisplayListActivity extends ListActivity {
     //    Object o = this.getListAdapter().getItem(position-1);
      //   String selected = o.toString();
         DBListEntry e = (DBListEntry) this.getListAdapter().getItem(position-1);
-        Toast.makeText(this, "You have chosen the term: " + " " + e.rowid, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "You have chosen the "+wherePK+": " + " " + e.rowid, Toast.LENGTH_LONG).show();
 
-        if (currentMode == VIEW_MODE) {
-            //Enter into Data and display sub entries
+        if (currentMode == VIEW_MODE ) { // && !(dataTitle.equals("assessments") || dataTitle.equals("mentors")) PUTBACK AFTER DETAIL VIEW IMPLEMENTED
+
+            switch (dataTitle) {
+                case "terms": intentExt = new String[] {"courses", "course_id", String.valueOf(e.rowid), " in term "};
+                    break;
+                case "courses": intentExt = new String[] {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+                    break;
+                case "assessments": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "};
+                    break;
+                case "mentors": intentExt = new String[] {"terms", "term_id", String.valueOf(e.rowid), " in course "};
+                    break;
+            }
+
+
+            Intent intent = new Intent(this, DisplayListActivity.class);
+            intent.putExtra("table",intentExt[0]);
+            intent.putExtra("where_pk",intentExt[1]);
+            intent.putExtra("where_value", intentExt[2]);
+            intent.putExtra("header_sub", intentExt[3]);
+            startActivity(intent);
         }
 
         if (currentMode == DELETE_MODE) {
-            //Delete the entry
-           // processDelete();
             db.open();
             db.delete("terms", "term_id", e.rowid);
             db.close();
 
-            queryDatabase();
-   //         populateList();
+            populateListFromSql();
         }
 
-     //   getListAdapter().
+        if (currentMode == EDIT_MODE) {
+            buildTermEditer(String.valueOf(e.rowid));
+        }
     }
 
     public class DBListEntry {

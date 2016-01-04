@@ -3,7 +3,7 @@
     android:orientation="vertical" android:layout_width="wrap_content"
     android:layout_height="wrap_content">
     <EditText
-        android:id="@+id/term_title"
+        android:id="@+id/course_title"
         android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -11,9 +11,9 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:hint="Term Title" />
+        android:hint="Course Title" />
     <EditText
-        android:id="@+id/term_start"
+        android:id="@+id/course_start"
         android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,9 +22,9 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Term Start Date"/>
+        android:hint="Course Start Date"/>
     <EditText
-        android:id="@+id/term_end"
+        android:id="@+id/course_end"
         android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,5 +33,16 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Term End Date"/>
+        android:hint="Course End Date"/>
+    <EditText
+        android:id="@+id/course_status"
+        android:inputType="text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="sans-serif"
+        android:hint="Course Status"/>
 </LinearLayout>

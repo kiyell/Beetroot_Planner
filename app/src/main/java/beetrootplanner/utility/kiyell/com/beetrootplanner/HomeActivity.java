@@ -45,8 +45,10 @@ public class HomeActivity extends AppCompatActivity {
 
     public void startListActivity(View v) {
         Intent intent = new Intent(this, DisplayListActivity.class);
-        intent.putExtra("ttl","terms");
-        intent.putExtra("pk","term_id");
+        intent.putExtra("table","terms");
+        intent.putExtra("header_sub"," ");
+        intent.putExtra("where_pk","term_id");
+        intent.putExtra("where_value","");
         startActivity(intent);
     }
 
