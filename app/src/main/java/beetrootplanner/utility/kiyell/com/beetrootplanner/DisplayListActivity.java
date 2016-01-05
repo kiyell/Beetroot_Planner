@@ -427,7 +427,19 @@ public class DisplayListActivity extends ListActivity {
 
         if (currentMode == DELETE_MODE) {
             db.open();
-            db.delete("terms", "term_id", e.rowid);
+
+            switch (dataTitle) {
+                case "terms": db.delete("terms", "term_id", e.rowid);
+                    break;
+                case "courses": db.delete("courses", "course_id", e.rowid);
+                    break;
+                case "assessments": db.delete("assessments", "assessment_id", e.rowid);
+                    break;
+                case "mentors": db.delete("mentors", "mentor_id", e.rowid);
+                    break;
+            }
+
+
             db.close();
 
             populateListFromSql();
