@@ -106,6 +106,15 @@ public class DBAdapter {
         return db.update("terms", updateValues, "term_id = "+rowid, null);
     }
 
+    public long updateCourse(String ttl, String st, String ed, String stat, String rowid)
+    {
+        ContentValues updateValues = new ContentValues();
+        updateValues.put("course_title", ttl);
+        updateValues.put("course_start", st);
+        updateValues.put("course_end", ed);
+        updateValues.put("course_status", stat);
+        return db.update("courses", updateValues, "course_id = "+rowid, null);
+    }
     //-- Retrieve Term Data
     public Cursor getAllTerms()
     {
@@ -128,6 +137,10 @@ public class DBAdapter {
         if (dt.equals("terms")) {
             return db.query("terms", new String[] {"term_id", "term_title",
                     "term_start", "term_end"}, "term_id = "+wh, null, null, null, null);
+        }
+        if (dt.equals("courses")) {
+            return db.query("courses", new String[] {"course_id", "course_title",
+                    "course_start", "course_end", "course_status"}, "course_id = "+wh, null, null, null, null);
         }
 
         return null;

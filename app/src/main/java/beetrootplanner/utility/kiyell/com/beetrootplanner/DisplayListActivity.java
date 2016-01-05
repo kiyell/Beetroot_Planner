@@ -170,7 +170,7 @@ public class DisplayListActivity extends ListActivity {
         dialog.show();
     }
 
-    public void buildTermEditer(String wh) {
+    public void buildTermEditor(String wh) {
         final String where = wh;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -195,32 +195,21 @@ public class DisplayListActivity extends ListActivity {
             }
 
         db.close();
-
-
         builder.setView(v);
-
-
-
-        //Dialog d = (Dialog) dialog;
-
-
-
-
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
-
-
                 Dialog d = (Dialog) dialog;
                 EditText termTitle, termStart, termEnd;
                 termTitle = (EditText) d.findViewById(R.id.term_title);
                 termStart = (EditText) d.findViewById(R.id.term_start);
                 termEnd = (EditText) d.findViewById(R.id.term_end);
-
+                /*
                 db.open();
                 db.getRow("terms",where);
                 db.close();
+                */
 
 
 
@@ -293,6 +282,73 @@ public class DisplayListActivity extends ListActivity {
         });
         builder.setMessage("Add a new Course")
                 .setTitle("Add Course");
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    public void buildCourseEditor(String wh) {
+        final String where = wh;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        View v = inflater.inflate(R.layout.dialog_add_course, null);
+        EditText courseTitle, courseStart, courseEnd, courseStatus;
+        courseTitle = (EditText) v.findViewById(R.id.course_title);
+        courseStart = (EditText) v.findViewById(R.id.course_start);
+        courseEnd = (EditText) v.findViewById(R.id.course_end);
+        courseStatus = (EditText) v.findViewById(R.id.course_status);
+
+        db.open();
+        Cursor result = db.getRow("courses",where);
+
+
+        if (result.moveToFirst()) {
+            courseTitle.setText(result.getString(1));
+            courseStart.setText(result.getString(2));
+            courseEnd.setText(result.getString(3));
+            courseStatus.setText(result.getString(4));
+        }
+
+        db.close();
+        builder.setView(v);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText courseTitle, courseStart, courseEnd, courseStatus;
+                courseTitle = (EditText) d.findViewById(R.id.course_title);
+                courseStart = (EditText) d.findViewById(R.id.course_start);
+                courseEnd = (EditText) d.findViewById(R.id.course_end);
+                courseStatus = (EditText) d.findViewById(R.id.course_status);
+
+
+                StringBuilder output = new StringBuilder();
+                output.append(courseTitle.getText() + " ");
+                output.append(courseStart.getText() + " ");
+                output.append(courseEnd.getText() + " ");
+                output.append(courseStatus.getText() + " ");
+
+                Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
+
+                db.open();
+                long term_id = db.updateCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), where);
+                db.close();
+                populateListFromSql();
+                setMode(VIEW_MODE);
+
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                setMode(VIEW_MODE);
+            }
+        });
+        builder.setMessage("Edit a Term")
+                .setTitle("Edit Term");
         dialog = builder.create();
         dialog.show();
     }
@@ -378,7 +434,18 @@ public class DisplayListActivity extends ListActivity {
         }
 
         if (currentMode == EDIT_MODE) {
-            buildTermEditer(String.valueOf(e.rowid));
+
+            switch (dataTitle) {
+                case "terms": buildTermEditor(String.valueOf(e.rowid));
+                    break;
+                case "courses": buildCourseEditor(String.valueOf(e.rowid));
+                    break;
+                case "assessments":
+                    break;
+                case "mentors":
+                    break;
+            }
+
         }
     }
 
