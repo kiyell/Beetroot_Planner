@@ -4,9 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 public class DBAdapter {
 
@@ -59,6 +62,15 @@ public class DBAdapter {
             db.execSQL("DROP TABLE IF EXISTS contacts");
             onCreate(db);
         }
+
+        @Override
+        public void onOpen(SQLiteDatabase db) {
+            super.onOpen(db);
+            if (!db.isReadOnly()) {
+                // foreign key constraints
+                db.execSQL("PRAGMA foreign_keys=ON;");
+            }
+        }
     }
     //---opens the database---
     public DBAdapter open() throws SQLException
@@ -94,7 +106,12 @@ public class DBAdapter {
     }
 
     public void delete(String table,String pk, long rowId) {
-        db.delete(table, pk + "=" + rowId, null);
+        try {
+            db.delete(table, pk + "=" + rowId, null);
+        } catch(SQLiteConstraintException sec) {
+            Toast.makeText(this.context, "Unable to delete item from " + table + " because it is not empty ", Toast.LENGTH_LONG).show();
+        }
+
     }
     //-- Update Term Data
     public long updateTerm(String ttl, String st, String ed, String rowid)

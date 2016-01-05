@@ -401,7 +401,7 @@ public class DisplayListActivity extends ListActivity {
     //    Object o = this.getListAdapter().getItem(position-1);
      //   String selected = o.toString();
         DBListEntry e = (DBListEntry) this.getListAdapter().getItem(position-1);
-        Toast.makeText(this, "You have chosen the "+wherePK+": " + " " + e.rowid, Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "You have chosen the "+wherePK+": " + " " + e.rowid, Toast.LENGTH_LONG).show();
 
         if (currentMode == VIEW_MODE ) { // && !(dataTitle.equals("assessments") || dataTitle.equals("mentors")) PUTBACK AFTER DETAIL VIEW IMPLEMENTED
 
