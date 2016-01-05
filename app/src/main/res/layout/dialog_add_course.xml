@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:stretchColumns="2">
+    <TableRow
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:text="Course Title:"
+        android:layout_column="1" />
     <EditText
         android:id="@+id/course_title"
         android:inputType="text"
@@ -11,7 +25,21 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:hint="Course Title" />
+        android:layout_column="2"/>
+    </TableRow>
+    <TableRow
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:text="Course Start:"
+        android:layout_column="1" />
     <EditText
         android:id="@+id/course_start"
         android:inputType="text"
@@ -22,7 +50,21 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Course Start Date"/>
+        android:layout_column="2"/>
+    </TableRow>
+    <TableRow
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:text="Course End:"
+        android:layout_column="1" />
     <EditText
         android:id="@+id/course_end"
         android:inputType="text"
@@ -33,7 +75,21 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Course End Date"/>
+        android:layout_column="2"/>
+    </TableRow>
+    <TableRow
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="4dp"
+        android:text="Course Status:"
+        android:layout_column="1" />
     <EditText
         android:id="@+id/course_status"
         android:inputType="text"
@@ -44,5 +100,6 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Course Status"/>
-</LinearLayout>
+        android:layout_column="2"/>
+    </TableRow>
+</TableLayout>

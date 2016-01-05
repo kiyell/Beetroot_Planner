@@ -1,6 +1,7 @@
 package beetrootplanner.utility.kiyell.com.beetrootplanner;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -12,12 +13,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class DisplayListActivity extends ListActivity {
 
@@ -56,14 +60,8 @@ public class DisplayListActivity extends ListActivity {
         tView.setOnClickListener(null);
         getListView().addHeaderView(tView);
 
-
-
-
         currentMode = VIEW_MODE;
         populateListFromSql();
-
-
-
 
     }
 
@@ -78,7 +76,7 @@ public class DisplayListActivity extends ListActivity {
                 break;
             case "courses": c = db.getSubset(dataTitle,whereValue);
                 break;
-            case "assessments": //retrieveAssessments(where_pk);
+            case "assessments": c = db.getSubset(dataTitle,whereValue);
                 break;
             case "mentors": //retrieveMentors(where_pk);
                 break;
@@ -119,7 +117,7 @@ public class DisplayListActivity extends ListActivity {
                     break;
                 case "courses": buildCourseAdder();
                     break;
-                case "assessments":
+                case "assessments": buildAssessmentAdder();
                     break;
                 case "mentors":
                     break;
@@ -269,8 +267,8 @@ public class DisplayListActivity extends ListActivity {
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
-                long term_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), whereValue);
-                Toast.makeText(d.getContext(), "term_id created is: " + term_id, Toast.LENGTH_LONG).show();
+                long course_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), whereValue);
+                Toast.makeText(d.getContext(), "course_id created is: " + course_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
             }
@@ -349,6 +347,57 @@ public class DisplayListActivity extends ListActivity {
         });
         builder.setMessage("Edit a Term")
                 .setTitle("Edit Term");
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    public void buildAssessmentAdder() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        builder.setView(inflater.inflate(R.layout.dialog_add_assessment, null));
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText assessmentTitle, assessmentText, assessmentPhoto;
+                DatePicker assessmentDueDate;
+
+                assessmentTitle = (EditText) d.findViewById(R.id.assessment_title);
+                assessmentDueDate = (DatePicker) d.findViewById(R.id.assessment_datePicker);
+
+                long dateTime = assessmentDueDate.getCalendarView().getDate();
+                Date date = new Date(dateTime);
+
+                assessmentText = (EditText) d.findViewById(R.id.assessment_txt_note);
+                assessmentPhoto = (EditText) d.findViewById(R.id.assessment_photo_note);
+
+                StringBuilder output = new StringBuilder();
+                output.append(assessmentTitle.getText() + " ");
+                output.append(date.toString() + " ");
+                output.append(assessmentText.getText() + " ");
+                output.append(assessmentPhoto.getText() + " ");
+                output.append(" WHERE value is " + whereValue);
+
+
+                Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long assessment_id = db.addAssessment(assessmentTitle.getText().toString(), date.toString(), assessmentText.getText().toString(), assessmentPhoto.getText().toString(), whereValue);
+                Toast.makeText(d.getContext(), "assessment_id created is: " + assessment_id, Toast.LENGTH_LONG).show();
+                db.close();
+                populateListFromSql();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+        builder.setMessage("Add a new Assessment")
+                .setTitle("Add Assessment");
         dialog = builder.create();
         dialog.show();
     }

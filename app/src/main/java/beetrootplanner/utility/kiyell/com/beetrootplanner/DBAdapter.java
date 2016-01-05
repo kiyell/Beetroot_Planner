@@ -19,14 +19,18 @@ public class DBAdapter {
     static final String TAG = "DBAdapter";
     static final String DATABASE_NAME = "MyDB";
     static final String DATABASE_TABLE = "contacts";
-    static final int DATABASE_VERSION = 1;
+    static final int DATABASE_VERSION = 2;
     static final String TERMS_TABLE_CREATE =
             "create table terms (term_id integer primary key autoincrement, term_title text not null, term_start text not null, term_end text not null);";
 
     static final String COURSES_TABLE_CREATE = "create table courses (course_id integer primary key autoincrement, course_title text not null, course_start text not null," +
             " course_end text not null, course_status text not null, term_id integer not null, foreign key (term_id) references terms(term_id) ON DELETE NO ACTION);";
-    /*"create table contacts (_id integer primary key autoincrement, "
-            + "name text not null, email text not null);";*/
+
+    static final String ASSESSMENT_TABLE_CREATE = "create table assessments (assessment_id integer primary key autoincrement, assessment_title text not null, assessment_due text not null," +
+            " assessment_text_note text not null, assessment_photo_note text not null, course_id integer not null, foreign key (course_id) references courses(course_id) ON DELETE CASCADE);";
+
+    static final String MENTORS_TABLE_CREATE = "create table mentors (mentor_id integer primary key autoincrement, mentor_name text not null, mentor_phone text not null," +
+            " mentor_email text not null, course_id integer not null, foreign key (course_id) references courses(course_id) ON DELETE CASCADE);";
 
 
 
@@ -50,6 +54,8 @@ public class DBAdapter {
             try {
                 db.execSQL(TERMS_TABLE_CREATE);
                 db.execSQL(COURSES_TABLE_CREATE);
+                db.execSQL(ASSESSMENT_TABLE_CREATE);
+                db.execSQL(MENTORS_TABLE_CREATE);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -105,6 +111,17 @@ public class DBAdapter {
         return db.insert("courses", null, initialValues);
     }
 
+    public long addAssessment(String ttl, String due, String txt, String pht, String id)
+    {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("assessment_title", ttl);
+        initialValues.put("assessment_due", due);
+        initialValues.put("assessment_text_note", txt);
+        initialValues.put("assessment_photo_note", pht);
+        initialValues.put("course_id", id);
+        return db.insert("assessments", null, initialValues);
+    }
+
     public void delete(String table,String pk, long rowId) {
         try {
             db.delete(table, pk + "=" + rowId, null);
@@ -130,7 +147,17 @@ public class DBAdapter {
         updateValues.put("course_start", st);
         updateValues.put("course_end", ed);
         updateValues.put("course_status", stat);
-        return db.update("courses", updateValues, "course_id = "+rowid, null);
+        return db.update("courses", updateValues, "course_id = " + rowid, null);
+    }
+
+    public long updateAssessment(String ttl, String due, String txt, String pht, String rowid)
+    {
+        ContentValues updateValues = new ContentValues();
+        updateValues.put("assessment_title", ttl);
+        updateValues.put("assessment_due", due);
+        updateValues.put("assessment_text_note", txt);
+        updateValues.put("assessment_photo_note", pht);
+        return db.update("assessments", updateValues, "course_id = " + rowid, null);
     }
     //-- Retrieve Term Data
     public Cursor getAllTerms()
@@ -144,6 +171,10 @@ public class DBAdapter {
         if (dt.equals("courses")) {
             return db.query("courses", new String[] {"course_id", "course_title",
                     "course_start", "course_end", "course_status", "term_id"}, "term_id = "+wv, null, null, null, null); //wpk+" = "+wv
+        }
+        if (dt.equals("assessments")) {
+            return db.query("assessments", new String[] {"assessment_id", "assessment_title",
+                    "assessment_due", "assessment_text_note", "assessment_photo_note", "course_id"}, "course_id = "+wv, null, null, null, null); //wpk+" = "+wv
         }
 
         return null;
@@ -159,13 +190,12 @@ public class DBAdapter {
             return db.query("courses", new String[] {"course_id", "course_title",
                     "course_start", "course_end", "course_status"}, "course_id = "+wh, null, null, null, null);
         }
+        if (dt.equals("assessments")) {
+            return db.query("assessments", new String[] {"assessment_id", "assessment_title",
+                    "assessment_due", "assessment_text_note", "assessment_photo_note", "course_id"}, "course_id = "+wh, null, null, null, null);
+        }
 
         return null;
-    }
-    //---deletes a particular contact---
-    public boolean deleteContact(long rowId)
-    {
-        return db.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
     }
 
 
