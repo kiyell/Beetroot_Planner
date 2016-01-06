@@ -51,7 +51,9 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:layout_column="2" />
+        android:layout_column="2"
+        android:onClick="getDateDialog"
+        android:focusableInTouchMode="false"/>
     </TableRow>
     <TableRow
         android:layout_width="fill_parent"
@@ -63,7 +65,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginTop="4dp"
         android:layout_marginLeft="4dp"
-        android:text="Term Start Date:"
+        android:text="Term End Date:"
         android:layout_column="1" />
     <EditText
         android:id="@+id/term_end"
@@ -75,6 +77,8 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:layout_column="2" />
+        android:layout_column="2"
+        android:onClick="getDateDialog"
+        android:focusableInTouchMode="false"/>
     </TableRow>
 </TableLayout>

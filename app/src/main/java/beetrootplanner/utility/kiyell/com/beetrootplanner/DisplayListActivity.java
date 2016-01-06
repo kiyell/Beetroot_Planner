@@ -9,18 +9,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DisplayListActivity extends ListActivity {
@@ -56,10 +60,9 @@ public class DisplayListActivity extends ListActivity {
         whereValue = getIntent().getStringExtra("where_value");
 
         TextView tView = new TextView(this);
-        tView.setText("Displaying " + dataTitle + getIntent().getStringExtra("header_sub")+whereValue);
+        tView.setText("Displaying " + dataTitle + getIntent().getStringExtra("header_sub") + whereValue);
         tView.setOnClickListener(null);
         getListView().addHeaderView(tView);
-
         currentMode = VIEW_MODE;
         populateListFromSql();
 
@@ -251,23 +254,26 @@ public class DisplayListActivity extends ListActivity {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
                 Dialog d = (Dialog) dialog;
-                EditText courseTitle, courseStart, courseEnd, courseStatus;
+                EditText courseTitle, courseStart, courseEnd, courseNotes;
+                Spinner courseStatus;
                 courseTitle = (EditText) d.findViewById(R.id.course_title);
                 courseStart = (EditText) d.findViewById(R.id.course_start);
                 courseEnd = (EditText) d.findViewById(R.id.course_end);
-                courseStatus = (EditText) d.findViewById(R.id.course_status);
+                courseStatus = (Spinner) d.findViewById(R.id.course_status);
+                courseNotes = (EditText) d.findViewById(R.id.course_notes);
+
 
                 StringBuilder output = new StringBuilder();
                 output.append(courseTitle.getText() + " ");
                 output.append(courseStart.getText() + " ");
                 output.append(courseEnd.getText() + " ");
-                output.append(courseStatus.getText() + " ");
+                output.append(courseStatus.getSelectedItem().toString() + " ");
                 output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
-                long course_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), whereValue);
+                long course_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getSelectedItem().toString(), courseNotes.getText().toString(), whereValue);
                 Toast.makeText(d.getContext(), "course_id created is: " + course_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
@@ -292,11 +298,13 @@ public class DisplayListActivity extends ListActivity {
         LayoutInflater inflater = this.getLayoutInflater();
 
         View v = inflater.inflate(R.layout.dialog_add_course, null);
-        EditText courseTitle, courseStart, courseEnd, courseStatus;
+        EditText courseTitle, courseStart, courseEnd, courseNotes;
+        Spinner courseStatus;
         courseTitle = (EditText) v.findViewById(R.id.course_title);
         courseStart = (EditText) v.findViewById(R.id.course_start);
         courseEnd = (EditText) v.findViewById(R.id.course_end);
-        courseStatus = (EditText) v.findViewById(R.id.course_status);
+        courseStatus = (Spinner) v.findViewById(R.id.course_status);
+        courseNotes = (EditText) v.findViewById(R.id.course_notes);
 
         db.open();
         Cursor result = db.getRow("courses",where);
@@ -306,7 +314,8 @@ public class DisplayListActivity extends ListActivity {
             courseTitle.setText(result.getString(1));
             courseStart.setText(result.getString(2));
             courseEnd.setText(result.getString(3));
-            courseStatus.setText(result.getString(4));
+            courseStatus.setSelection(((ArrayAdapter<String>) courseStatus.getAdapter()).getPosition(result.getString(4)));
+            courseNotes.setText(result.getString(5));
         }
 
         db.close();
@@ -316,23 +325,26 @@ public class DisplayListActivity extends ListActivity {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
                 Dialog d = (Dialog) dialog;
-                EditText courseTitle, courseStart, courseEnd, courseStatus;
+                EditText courseTitle, courseStart, courseEnd, courseNotes;
+                Spinner courseStatus;
                 courseTitle = (EditText) d.findViewById(R.id.course_title);
                 courseStart = (EditText) d.findViewById(R.id.course_start);
                 courseEnd = (EditText) d.findViewById(R.id.course_end);
-                courseStatus = (EditText) d.findViewById(R.id.course_status);
+                courseStatus = (Spinner) d.findViewById(R.id.course_status);
+                courseNotes = (EditText) d.findViewById(R.id.course_notes);
+
 
 
                 StringBuilder output = new StringBuilder();
                 output.append(courseTitle.getText() + " ");
                 output.append(courseStart.getText() + " ");
                 output.append(courseEnd.getText() + " ");
-                output.append(courseStatus.getText() + " ");
+                output.append(courseStatus.getSelectedItem().toString() + " ");
 
                 Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
 
                 db.open();
-                long term_id = db.updateCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getText().toString(), where);
+                long course_id = db.updateCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getSelectedItem().toString(), courseNotes.getText().toString(), where);
                 db.close();
                 populateListFromSql();
                 setMode(VIEW_MODE);
@@ -345,8 +357,8 @@ public class DisplayListActivity extends ListActivity {
                 setMode(VIEW_MODE);
             }
         });
-        builder.setMessage("Edit a Term")
-                .setTitle("Edit Term");
+        builder.setMessage("Edit a Course")
+                .setTitle("Edit Course");
         dialog = builder.create();
         dialog.show();
     }
@@ -357,35 +369,59 @@ public class DisplayListActivity extends ListActivity {
 
         LayoutInflater inflater = this.getLayoutInflater();
 
-        builder.setView(inflater.inflate(R.layout.dialog_add_assessment, null));
+        final View dialogView = inflater.inflate(R.layout.dialog_add_assessment, null);
+
+       /*
+        imageAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView text = (TextView) dialogView.findViewById(R.id.assessment_photo_note);
+                text.setText("Image added!");
+
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,
+                        "Select Picture"), 1);
+
+
+            }
+        }); */
+        builder.setView(dialogView);
+
+
+
 
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
                 Dialog d = (Dialog) dialog;
-                EditText assessmentTitle, assessmentText, assessmentPhoto;
-                DatePicker assessmentDueDate;
+                EditText  assessmentDueDate, assessmentTitle;
+                Spinner assessmentType;
+
+                //TextView assessmentPhoto = (TextView) d.findViewById(R.id.assessment_photo_note);
+
+
+                assessmentType = (Spinner) d.findViewById(R.id.assessment_type);
+                assessmentDueDate = (EditText) d.findViewById(R.id.assessment_due_date);
+                assessmentDueDate.setInputType(InputType.TYPE_NULL);
+
+              //  long dateTime = assessmentDueDate.getCalendarView().getDate();
+              //  Date date = new Date(dateTime);
 
                 assessmentTitle = (EditText) d.findViewById(R.id.assessment_title);
-                assessmentDueDate = (DatePicker) d.findViewById(R.id.assessment_datePicker);
 
-                long dateTime = assessmentDueDate.getCalendarView().getDate();
-                Date date = new Date(dateTime);
-
-                assessmentText = (EditText) d.findViewById(R.id.assessment_txt_note);
-                assessmentPhoto = (EditText) d.findViewById(R.id.assessment_photo_note);
 
                 StringBuilder output = new StringBuilder();
                 output.append(assessmentTitle.getText() + " ");
-                output.append(date.toString() + " ");
-                output.append(assessmentText.getText() + " ");
-                output.append(assessmentPhoto.getText() + " ");
+                output.append(assessmentType.getSelectedItem().toString() + " ");
+                output.append(assessmentDueDate.getText() + " ");
                 output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
-                long assessment_id = db.addAssessment(assessmentTitle.getText().toString(), date.toString(), assessmentText.getText().toString(), assessmentPhoto.getText().toString(), whereValue);
+                long assessment_id = db.addAssessment(assessmentTitle.getText().toString(), assessmentType.getSelectedItem().toString(), assessmentDueDate.getText().toString(), "N/A", whereValue);
                 Toast.makeText(d.getContext(), "assessment_id created is: " + assessment_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
@@ -402,11 +438,111 @@ public class DisplayListActivity extends ListActivity {
         dialog.show();
     }
 
+    public void buildAssessmentEditor(String wh) {
+        final String where = wh;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        View v = inflater.inflate(R.layout.dialog_add_assessment, null);
+        EditText assessmentTitle, assessmentDueDate;
+        Spinner assessmentType;
+
+        assessmentTitle = (EditText) v.findViewById(R.id.assessment_title);
+        assessmentType = (Spinner) v.findViewById(R.id.assessment_type);
+        assessmentDueDate = (EditText) v.findViewById(R.id.assessment_due_date);
+
+        db.open();
+        Cursor result = db.getRow("assessments",where);
+
+        Toast.makeText(this.getBaseContext(), "editor where is " + where, Toast.LENGTH_LONG).show();
+
+
+        if (result.moveToFirst()) {
+            assessmentTitle.setText(result.getString(1));
+            assessmentType.setSelection(((ArrayAdapter<String>) assessmentType.getAdapter()).getPosition(result.getString(2)));
+            assessmentDueDate.setText(result.getString(3));
+        }
+
+        db.close();
+        builder.setView(v);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Dialog d = (Dialog) dialog;
+                EditText  assessmentDueDate, assessmentTitle;
+                Spinner assessmentType;
+
+                //TextView assessmentPhoto = (TextView) d.findViewById(R.id.assessment_photo_note);
+
+
+                assessmentType = (Spinner) d.findViewById(R.id.assessment_type);
+                assessmentDueDate = (EditText) d.findViewById(R.id.assessment_due_date);
+                assessmentDueDate.setInputType(InputType.TYPE_NULL);
+
+                //  long dateTime = assessmentDueDate.getCalendarView().getDate();
+                //  Date date = new Date(dateTime);
+
+                assessmentTitle = (EditText) d.findViewById(R.id.assessment_title);
+
+
+                StringBuilder output = new StringBuilder();
+                output.append(assessmentTitle.getText() + " ");
+                output.append(assessmentType.getSelectedItem().toString() + " ");
+                output.append(assessmentDueDate.getText() + " ");
+                output.append(" WHERE value is " + whereValue);
+
+
+                Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long assessment_id = db.updateAssessment(assessmentTitle.getText().toString(), assessmentType.getSelectedItem().toString(), assessmentDueDate.getText().toString(), "N/A", where);
+                Toast.makeText(d.getContext(), "assessment_id updated is: " + assessment_id, Toast.LENGTH_LONG).show();
+                db.close();
+                populateListFromSql();
+                setMode(VIEW_MODE);
+
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                setMode(VIEW_MODE);
+            }
+        });
+        builder.setMessage("Edit an Assessment")
+                .setTitle("Edit Assessment");
+        dialog = builder.create();
+        dialog.show();
+    }
+
     public void deleteData(View v) {
 
      //       Intent intent = new Intent(this, DisplayListActivity.class);
      //       startActivity(intent);
             setMode(DELETE_MODE);
+    }
+
+    public void getDateDialog(View v) {
+       // Toast.makeText(v.getContext(), "Clicked on edit text", Toast.LENGTH_LONG).show();
+        final EditText callingText = (EditText) v;
+        Calendar initialCalendar = Calendar.getInstance();
+
+
+        DatePickerDialog d = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+
+                String formatedDate = new SimpleDateFormat("MMMM dd yyyy").format(newDate.getTime());
+                callingText.setText(formatedDate); /// USE TO GET LONG FROM DATABASE: new SimpleDateFormat("MMMM dd yyyy").parse(string);
+
+            }
+        },initialCalendar.get(Calendar.YEAR), initialCalendar.get(Calendar.MONTH), initialCalendar.get(Calendar.DAY_OF_MONTH));
+
+        d.show();
     }
 
     public void editData(View v) {
@@ -440,7 +576,7 @@ public class DisplayListActivity extends ListActivity {
             editButton.setEnabled(true);
 
             Button addButton = (Button) findViewById(R.id.button_add);
-            addButton.setText("Add Term");
+            addButton.setText("Add");
         }
     }
 
@@ -501,7 +637,7 @@ public class DisplayListActivity extends ListActivity {
                     break;
                 case "courses": buildCourseEditor(String.valueOf(e.rowid));
                     break;
-                case "assessments":
+                case "assessments": buildAssessmentEditor(String.valueOf(e.rowid));
                     break;
                 case "mentors":
                     break;

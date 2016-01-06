@@ -2,4 +2,17 @@
     <string name="app_name">Beetroot Planner</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_list">ListActivity</string>
+
+    <string-array name="course_statuses">
+        <item>IN PROGRESS</item>
+        <item>COMPLETED</item>
+        <item>DROPPED</item>
+        <item>PLAN TO TAKE</item>
+    </string-array>
+
+    <string-array name="assessment_types">
+        <item>Performance Assessment</item>
+        <item>Objective Assessment</item>
+    </string-array>
+
 </resources>

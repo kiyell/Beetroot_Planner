@@ -24,10 +24,10 @@ public class DBAdapter {
             "create table terms (term_id integer primary key autoincrement, term_title text not null, term_start text not null, term_end text not null);";
 
     static final String COURSES_TABLE_CREATE = "create table courses (course_id integer primary key autoincrement, course_title text not null, course_start text not null," +
-            " course_end text not null, course_status text not null, term_id integer not null, foreign key (term_id) references terms(term_id) ON DELETE NO ACTION);";
+            " course_end text not null, course_status text not null, course_notes text, term_id integer not null, foreign key (term_id) references terms(term_id) ON DELETE NO ACTION);";
 
-    static final String ASSESSMENT_TABLE_CREATE = "create table assessments (assessment_id integer primary key autoincrement, assessment_title text not null, assessment_due text not null," +
-            " assessment_text_note text not null, assessment_photo_note text not null, course_id integer not null, foreign key (course_id) references courses(course_id) ON DELETE CASCADE);";
+    static final String ASSESSMENT_TABLE_CREATE = "create table assessments (assessment_id integer primary key autoincrement, assessment_title text not null, assessment_type text not null, assessment_due text not null," +
+            " assessment_photo_note text not null, course_id integer not null, foreign key (course_id) references courses(course_id) ON DELETE CASCADE);";
 
     static final String MENTORS_TABLE_CREATE = "create table mentors (mentor_id integer primary key autoincrement, mentor_name text not null, mentor_phone text not null," +
             " mentor_email text not null, course_id integer not null, foreign key (course_id) references courses(course_id) ON DELETE CASCADE);";
@@ -100,23 +100,24 @@ public class DBAdapter {
         return db.insert("terms", null, initialValues);
     }
 
-    public long addCourse(String ttl, String st, String ed, String stat, String id)
+    public long addCourse(String ttl, String st, String ed, String stat, String not, String id)
     {
         ContentValues initialValues = new ContentValues();
         initialValues.put("course_title", ttl);
         initialValues.put("course_start", st);
         initialValues.put("course_end", ed);
         initialValues.put("course_status", stat);
+        initialValues.put("course_notes", not);
         initialValues.put("term_id", id);
         return db.insert("courses", null, initialValues);
     }
 
-    public long addAssessment(String ttl, String due, String txt, String pht, String id)
+    public long addAssessment(String ttl, String typ, String due, String pht, String id)
     {
         ContentValues initialValues = new ContentValues();
         initialValues.put("assessment_title", ttl);
+        initialValues.put("assessment_type", typ);
         initialValues.put("assessment_due", due);
-        initialValues.put("assessment_text_note", txt);
         initialValues.put("assessment_photo_note", pht);
         initialValues.put("course_id", id);
         return db.insert("assessments", null, initialValues);
@@ -140,24 +141,25 @@ public class DBAdapter {
         return db.update("terms", updateValues, "term_id = "+rowid, null);
     }
 
-    public long updateCourse(String ttl, String st, String ed, String stat, String rowid)
+    public long updateCourse(String ttl, String st, String ed, String stat, String not, String rowid)
     {
         ContentValues updateValues = new ContentValues();
         updateValues.put("course_title", ttl);
         updateValues.put("course_start", st);
         updateValues.put("course_end", ed);
         updateValues.put("course_status", stat);
+        updateValues.put("course_notes", not);
         return db.update("courses", updateValues, "course_id = " + rowid, null);
     }
 
-    public long updateAssessment(String ttl, String due, String txt, String pht, String rowid)
+    public long updateAssessment(String ttl, String typ, String due, String pht, String rowid)
     {
         ContentValues updateValues = new ContentValues();
         updateValues.put("assessment_title", ttl);
         updateValues.put("assessment_due", due);
-        updateValues.put("assessment_text_note", txt);
+        updateValues.put("assessment_type", typ);
         updateValues.put("assessment_photo_note", pht);
-        return db.update("assessments", updateValues, "course_id = " + rowid, null);
+        return db.update("assessments", updateValues, "assessment_id = " + rowid, null);
     }
     //-- Retrieve Term Data
     public Cursor getAllTerms()
@@ -170,11 +172,11 @@ public class DBAdapter {
     {
         if (dt.equals("courses")) {
             return db.query("courses", new String[] {"course_id", "course_title",
-                    "course_start", "course_end", "course_status", "term_id"}, "term_id = "+wv, null, null, null, null); //wpk+" = "+wv
+                    "course_start", "course_end", "course_status", "course_notes", "term_id"}, "term_id = "+wv, null, null, null, null); //wpk+" = "+wv
         }
         if (dt.equals("assessments")) {
-            return db.query("assessments", new String[] {"assessment_id", "assessment_title",
-                    "assessment_due", "assessment_text_note", "assessment_photo_note", "course_id"}, "course_id = "+wv, null, null, null, null); //wpk+" = "+wv
+            return db.query("assessments", new String[] {"assessment_id", "assessment_title", "assessment_type",
+                    "assessment_due", "assessment_photo_note", "course_id"}, "course_id = "+wv, null, null, null, null); //wpk+" = "+wv
         }
 
         return null;
@@ -188,11 +190,11 @@ public class DBAdapter {
         }
         if (dt.equals("courses")) {
             return db.query("courses", new String[] {"course_id", "course_title",
-                    "course_start", "course_end", "course_status"}, "course_id = "+wh, null, null, null, null);
+                    "course_start", "course_end", "course_status", "course_notes"}, "course_id = "+wh, null, null, null, null);
         }
         if (dt.equals("assessments")) {
-            return db.query("assessments", new String[] {"assessment_id", "assessment_title",
-                    "assessment_due", "assessment_text_note", "assessment_photo_note", "course_id"}, "course_id = "+wh, null, null, null, null);
+            return db.query("assessments", new String[] {"assessment_id", "assessment_title", "assessment_type",
+                    "assessment_due", "assessment_photo_note", "course_id"}, "assessment_id = "+wh, null, null, null, null);
         }
 
         return null;

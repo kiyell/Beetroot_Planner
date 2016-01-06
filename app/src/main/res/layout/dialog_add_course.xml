@@ -50,7 +50,9 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:layout_column="2"/>
+        android:layout_column="2"
+        android:onClick="getDateDialog"
+        android:focusableInTouchMode="false"/>
     </TableRow>
     <TableRow
 
@@ -75,7 +77,9 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="sans-serif"
-        android:layout_column="2"/>
+        android:layout_column="2"
+        android:onClick="getDateDialog"
+        android:focusableInTouchMode="false"/>
     </TableRow>
     <TableRow
 
@@ -90,16 +94,38 @@
         android:layout_marginLeft="4dp"
         android:text="Course Status:"
         android:layout_column="1" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/course_status"
+            android:layout_column="2"
+            android:entries="@array/course_statuses"/>
+    </TableRow>
+    <TableRow
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dip">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="4dp"
+            android:text="Course Notes:"
+            android:layout_column="1" />
+
+    </TableRow>
     <EditText
-        android:id="@+id/course_status"
-        android:inputType="text"
+        android:id="@+id/course_notes"
+        android:inputType="textMultiLine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:fontFamily="sans-serif"
-        android:layout_column="2"/>
-    </TableRow>
+        android:layout_column="2"
+        android:hint="Enter optional notes here"/>
 </TableLayout>
