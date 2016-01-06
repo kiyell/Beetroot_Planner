@@ -65,7 +65,10 @@ public class DBAdapter {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion +"to"
             +newVersion +",which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS contacts");
+            db.execSQL("DROP TABLE IF EXISTS terms");
+            db.execSQL("DROP TABLE IF EXISTS courses");
+            db.execSQL("DROP TABLE IF EXISTS assessments");
+            db.execSQL("DROP TABLE IF EXISTS mentors");
             onCreate(db);
         }
 
@@ -123,6 +126,15 @@ public class DBAdapter {
         return db.insert("assessments", null, initialValues);
     }
 
+    public long addMentor(String nm, String ph, String em, String id) {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("mentor_name", nm);
+        initialValues.put("mentor_phone", ph);
+        initialValues.put("mentor_email", em);
+        initialValues.put("course_id", id);
+        return db.insert("mentors", null, initialValues);
+    }
+
     public void delete(String table,String pk, long rowId) {
         try {
             db.delete(table, pk + "=" + rowId, null);
@@ -161,6 +173,15 @@ public class DBAdapter {
         updateValues.put("assessment_photo_note", pht);
         return db.update("assessments", updateValues, "assessment_id = " + rowid, null);
     }
+
+    public long updateMentor(String nm, String ph, String em, String id, String rowid){
+        ContentValues updateValues = new ContentValues();
+        updateValues.put("mentor_name", nm);
+        updateValues.put("mentor_phone", ph);
+        updateValues.put("mentor_email", em);
+        updateValues.put("course_id", id);
+        return db.update("mentors", updateValues, "mentor_id = " + rowid, null);
+    }
     //-- Retrieve Term Data
     public Cursor getAllTerms()
     {
@@ -177,6 +198,10 @@ public class DBAdapter {
         if (dt.equals("assessments")) {
             return db.query("assessments", new String[] {"assessment_id", "assessment_title", "assessment_type",
                     "assessment_due", "assessment_photo_note", "course_id"}, "course_id = "+wv, null, null, null, null); //wpk+" = "+wv
+        }
+        if (dt.equals("mentors")) {
+            return db.query("mentors", new String[] {"mentor_id", "mentor_name", "mentor_phone",
+                    "mentor_email", "course_id"}, "course_id = "+wv, null, null, null, null); //wpk+" = "+wv
         }
 
         return null;
@@ -195,6 +220,10 @@ public class DBAdapter {
         if (dt.equals("assessments")) {
             return db.query("assessments", new String[] {"assessment_id", "assessment_title", "assessment_type",
                     "assessment_due", "assessment_photo_note", "course_id"}, "assessment_id = "+wh, null, null, null, null);
+        }
+        if (dt.equals("mentors")) {
+            return db.query("mentors", new String[] {"mentor_id", "mentor_name", "mentor_phone",
+                    "mentor_email", "course_id"}, "mentor_id = "+wh, null, null, null, null); //wpk+" = "+wv
         }
 
         return null;

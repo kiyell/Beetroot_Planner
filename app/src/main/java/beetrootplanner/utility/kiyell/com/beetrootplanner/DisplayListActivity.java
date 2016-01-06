@@ -81,7 +81,7 @@ public class DisplayListActivity extends ListActivity {
                 break;
             case "assessments": c = db.getSubset(dataTitle,whereValue);
                 break;
-            case "mentors": //retrieveMentors(where_pk);
+            case "mentors": c = db.getSubset(dataTitle,whereValue);
                 break;
         }
 
@@ -122,7 +122,7 @@ public class DisplayListActivity extends ListActivity {
                     break;
                 case "assessments": buildAssessmentAdder();
                     break;
-                case "mentors":
+                case "mentors": buildMentorAdder();
                     break;
             }
 
@@ -516,6 +516,48 @@ public class DisplayListActivity extends ListActivity {
         dialog.show();
     }
 
+    public void buildMentorAdder() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        builder.setView(inflater.inflate(R.layout.dialog_add_mentor, null));
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText mentorName, mentorPhone, mentorEmail;
+                mentorName = (EditText) d.findViewById(R.id.mentor_name);
+                mentorPhone = (EditText) d.findViewById(R.id.mentor_phone);
+                mentorEmail = (EditText) d.findViewById(R.id.mentor_email);
+
+                StringBuilder output = new StringBuilder();
+                output.append(mentorName.getText() + " ");
+                output.append(mentorPhone.getText() + " ");
+                output.append(mentorEmail.getText() + " ");
+                output.append(" WHERE value is " + whereValue);
+
+
+                Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long mentor_id = db.addMentor(mentorName.getText().toString(), mentorPhone.getText().toString(), mentorEmail.getText().toString(), whereValue);
+                Toast.makeText(d.getContext(), "mentor_id created is: " + mentor_id, Toast.LENGTH_LONG).show();
+                db.close();
+                populateListFromSql();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+            }
+        });
+        builder.setMessage("Add a new Mentor")
+                .setTitle("Add Mentor");
+        dialog = builder.create();
+        dialog.show();
+    }
+
     public void deleteData(View v) {
 
      //       Intent intent = new Intent(this, DisplayListActivity.class);
@@ -593,7 +635,7 @@ public class DisplayListActivity extends ListActivity {
             switch (dataTitle) {
                 case "terms": intentExt = new String[] {"courses", "course_id", String.valueOf(e.rowid), " in term "};
                     break;
-                case "courses": intentExt = new String[] {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+                case "courses": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
                     break;
                 case "assessments": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "};
                     break;
