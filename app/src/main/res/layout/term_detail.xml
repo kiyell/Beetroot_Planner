@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Term Name"
+        android:id="@+id/text_term_name"
+        android:textAlignment="center"
+        android:textSize="30dp" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:shrinkColumns="*"
+        android:stretchColumns="*">
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Start:"
+                android:layout_column="1"
+                android:textSize="22dp" />
+            <TextView
+                android:id="@+id/start_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                android:text="July 06 2015"
+                android:layout_column="2"
+                android:textSize="22dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Alert"
+                android:id="@+id/set_alert_start"
+                android:layout_column="3"
+                android:onClick="setAlertStart"/>
+        </TableRow>
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="End:"
+                android:layout_column="1"
+                android:textSize="22dp" />
+            <TextView
+                android:id="@+id/end_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                android:text="December 06 2015"
+                android:layout_column="2"
+                android:textSize="22dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Alert"
+                android:id="@+id/set_alert_end"
+                android:layout_column="3"
+                android:onClick="setAlertEnd"/>
+        </TableRow>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Courses"
+            android:onClick="openList"/>
+    </TableLayout>
+
+    </LinearLayout>
+</ScrollView>

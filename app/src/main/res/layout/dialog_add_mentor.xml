@@ -43,7 +43,6 @@
             android:layout_column="1" />
         <EditText
             android:id="@+id/mentor_phone"
-            android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -52,7 +51,8 @@
             android:layout_marginBottom="4dp"
             android:fontFamily="sans-serif"
             android:layout_column="2"
-            android:phoneNumber="true" />
+            android:inputType="phone"
+            android:digits="1234567890"/>
     </TableRow>
     <TableRow
         android:layout_width="fill_parent"

@@ -60,7 +60,7 @@ public class DisplayListActivity extends ListActivity {
         whereValue = getIntent().getStringExtra("where_value");
 
         TextView tView = new TextView(this);
-        tView.setText("Displaying " + dataTitle + getIntent().getStringExtra("header_sub") + whereValue);
+        tView.setText("Displaying " + dataTitle + getIntent().getStringExtra("header_sub"));// + whereValue);
         tView.setOnClickListener(null);
         getListView().addHeaderView(tView);
         currentMode = VIEW_MODE;
@@ -558,6 +558,73 @@ public class DisplayListActivity extends ListActivity {
         dialog.show();
     }
 
+    public void buildMentorEditor(String wh) {
+        final String where = wh;
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        View dialogView = inflater.inflate(R.layout.dialog_add_mentor, null);
+
+        EditText mentorName, mentorPhone, mentorEmail;
+        mentorName = (EditText) dialogView.findViewById(R.id.mentor_name);
+        mentorPhone = (EditText) dialogView.findViewById(R.id.mentor_phone);
+        mentorEmail = (EditText) dialogView.findViewById(R.id.mentor_email);
+
+        db.open();
+        Cursor result = db.getRow("mentors",where);
+
+        Toast.makeText(this.getBaseContext(), "editor where is " + where, Toast.LENGTH_LONG).show();
+
+
+        if (result.moveToFirst()) {
+            mentorName.setText(result.getString(1));
+            mentorPhone.setText(result.getString(2));
+            mentorEmail.setText(result.getString(3));
+        }
+
+        db.close();
+
+
+        builder.setView(dialogView);
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Dialog d = (Dialog) dialog;
+                EditText mentorName, mentorPhone, mentorEmail;
+                mentorName = (EditText) d.findViewById(R.id.mentor_name);
+                mentorPhone = (EditText) d.findViewById(R.id.mentor_phone);
+                mentorEmail = (EditText) d.findViewById(R.id.mentor_email);
+
+                StringBuilder output = new StringBuilder();
+                output.append(mentorName.getText() + " ");
+                output.append(mentorPhone.getText() + " ");
+                output.append(mentorEmail.getText() + " ");
+                output.append(" WHERE value is " + whereValue);
+
+
+                Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
+                db.open();
+                long mentor_id = db.updateMentor(mentorName.getText().toString(), mentorPhone.getText().toString(), mentorEmail.getText().toString(), where);
+                Toast.makeText(d.getContext(), "mentor_id update is: " + mentor_id, Toast.LENGTH_LONG).show();
+                db.close();
+                populateListFromSql();
+                setMode(VIEW_MODE);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                setMode(VIEW_MODE);
+            }
+        });
+        builder.setMessage("Edit a Mentor")
+                .setTitle("Edit Mentor");
+        dialog = builder.create();
+        dialog.show();
+    }
+
     public void deleteData(View v) {
 
      //       Intent intent = new Intent(this, DisplayListActivity.class);
@@ -633,7 +700,7 @@ public class DisplayListActivity extends ListActivity {
         if (currentMode == VIEW_MODE ) { // && !(dataTitle.equals("assessments") || dataTitle.equals("mentors")) PUTBACK AFTER DETAIL VIEW IMPLEMENTED
 
             switch (dataTitle) {
-                case "terms": intentExt = new String[] {"courses", "course_id", String.valueOf(e.rowid), " in term "};
+                case "terms": intentExt = new String[] {"terms", "term_id", String.valueOf(e.rowid), " "}; //{"courses", "course_id", String.valueOf(e.rowid), " in term "};
                     break;
                 case "courses": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
                     break;
@@ -644,7 +711,9 @@ public class DisplayListActivity extends ListActivity {
             }
 
 
-            Intent intent = new Intent(this, DisplayListActivity.class);
+            //Intent intent = new Intent(this, DisplayListActivity.class);
+
+            Intent intent = new Intent(this, DetailActivity.class);
             intent.putExtra("table",intentExt[0]);
             intent.putExtra("where_pk",intentExt[1]);
             intent.putExtra("where_value", intentExt[2]);
@@ -681,7 +750,7 @@ public class DisplayListActivity extends ListActivity {
                     break;
                 case "assessments": buildAssessmentEditor(String.valueOf(e.rowid));
                     break;
-                case "mentors":
+                case "mentors": buildMentorEditor(String.valueOf(e.rowid));
                     break;
             }
 

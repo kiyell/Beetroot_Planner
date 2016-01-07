@@ -174,12 +174,11 @@ public class DBAdapter {
         return db.update("assessments", updateValues, "assessment_id = " + rowid, null);
     }
 
-    public long updateMentor(String nm, String ph, String em, String id, String rowid){
+    public long updateMentor(String nm, String ph, String em, String rowid){
         ContentValues updateValues = new ContentValues();
         updateValues.put("mentor_name", nm);
         updateValues.put("mentor_phone", ph);
         updateValues.put("mentor_email", em);
-        updateValues.put("course_id", id);
         return db.update("mentors", updateValues, "mentor_id = " + rowid, null);
     }
     //-- Retrieve Term Data
