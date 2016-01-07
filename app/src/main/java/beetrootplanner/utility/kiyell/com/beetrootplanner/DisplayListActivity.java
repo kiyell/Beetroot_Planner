@@ -702,7 +702,7 @@ public class DisplayListActivity extends ListActivity {
             switch (dataTitle) {
                 case "terms": intentExt = new String[] {"terms", "term_id", String.valueOf(e.rowid), " "}; //{"courses", "course_id", String.valueOf(e.rowid), " in term "};
                     break;
-                case "courses": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+                case "courses": intentExt = new String[] {"courses", "course_id", String.valueOf(e.rowid), " "};//{"mentors", "mentor_id", String.valueOf(e.rowid), " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
                     break;
                 case "assessments": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "};
                     break;

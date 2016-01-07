@@ -3,8 +3,12 @@ package beetrootplanner.utility.kiyell.com.beetrootplanner;
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.CalendarContract;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ShareActionProvider;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +30,7 @@ public class DetailActivity extends AppCompatActivity {
     DBAdapter db;
     TextView title,start, end;
     String beginTime, endTime, eventTitle;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +45,7 @@ public class DetailActivity extends AppCompatActivity {
         switch (dataTitle) {
             case "terms": setupTermView();
                 break;
-            case "courses":
+            case "courses": setupCourseView();
                 break;
             case "assessments":
                 break;
@@ -113,7 +118,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     public void setupTermView() {
-        setContentView(R.layout.term_detail);
+        setContentView(R.layout.detail_term);
         db.open();
         Cursor c = db.getRow(dataTitle, whereValue);
         if (c.moveToFirst()) {
@@ -123,6 +128,57 @@ public class DetailActivity extends AppCompatActivity {
             end = (TextView) findViewById(R.id.end_date); end.setText(c.getString(3)); endTime = c.getString(3);
         }
         db.close();
+    }
+
+    public void setupCourseView() {
+        setContentView(R.layout.detail_course);
+        db.open();
+        Cursor c = db.getRow(dataTitle, whereValue);
+        if (c.moveToFirst()) {
+            previousTitle = c.getString(1);
+            title = (TextView) findViewById(R.id.text_course_name); title.setText(c.getString(1)); eventTitle = c.getString(1);
+            start = (TextView) findViewById(R.id.start_date); start.setText(c.getString(2)); beginTime = c.getString(2);
+            end = (TextView) findViewById(R.id.end_date); end.setText(c.getString(3)); endTime = c.getString(3);
+            TextView status = (TextView) findViewById(R.id.text_course_status); status.setText(c.getString(4));
+            TextView notes = (TextView) findViewById(R.id.text_course_notes); notes.setText("Notes: "+c.getString(5));
+        }
+        db.close();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.share_menu, menu);
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+       // mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        // Set history different from the default before getting the action
+        // view since a call to MenuItemCompat.getActionView() calls
+        // ActionProvider.onCreateActionView() which uses the backing file name. Omit this
+        // line if using the default share history file is desired.
+        //mShareActionProvider.setShareHistoryFileName("custom_share_history.xml");
+
+        // Return true to display menu
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 
