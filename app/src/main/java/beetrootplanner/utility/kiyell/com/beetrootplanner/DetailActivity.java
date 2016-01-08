@@ -3,6 +3,7 @@ package beetrootplanner.utility.kiyell.com.beetrootplanner;
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.CalendarContract;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +19,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity  implements
+        ShareActionProvider.OnShareTargetSelectedListener{
 
     String dataTitle;
     String wherePK;
@@ -31,6 +33,7 @@ public class DetailActivity extends AppCompatActivity {
     TextView title,start, end;
     String beginTime, endTime, eventTitle;
     private ShareActionProvider mShareActionProvider;
+    private Intent shareIntent=new Intent(Intent.ACTION_SEND);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,23 +50,34 @@ public class DetailActivity extends AppCompatActivity {
                 break;
             case "courses": setupCourseView();
                 break;
-            case "assessments":
+            case "assessments": setupAssessmentView();
                 break;
-            case "mentors":
+            case "mentors": setupMentorView();
                 break;
         }
+      //  this.getSupportActionBar().setHomeButtonEnabled(true);
+      //  this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public void openList(View v) {
 
         switch (dataTitle) {
-            case "terms": intentExt = new String[] {"courses", "course_id", whereValue, " in "+previousTitle}; //{"courses", "course_id", String.valueOf(e.rowid), " in term "};
+            case "terms": intentExt = new String[] {"courses", "course_id", whereValue, " in term: "+previousTitle}; //{"courses", "course_id", String.valueOf(e.rowid), " in term "};
                 break;
-            case "courses": intentExt = new String[] {"mentors", "mentor_id", whereValue, " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+            case "courses": {
+
+                if (v.getId() == R.id.button_mentors) {
+                    intentExt = new String[] {"mentors", "mentor_id", whereValue, " in course: "+previousTitle}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+                }
+                if (v.getId() == R.id.button_assessments) {
+                    intentExt = new String[] {"assessments", "assessment_id", whereValue, " in course: "+previousTitle}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
+                }
+
+            }
                 break;
-            case "assessments": intentExt = new String[] {"mentors", "mentor_id", whereValue, " in course "};
+            case "assessments": //intentExt = new String[] {"mentors", "mentor_id", whereValue, " in course "};
                 break;
-            case "mentors": intentExt = new String[] {"terms", "term_id", whereValue, " in course "};
+            case "mentors": //intentExt = new String[] {"terms", "term_id", whereValue, " in course "};
                 break;
         }
 
@@ -119,6 +133,7 @@ public class DetailActivity extends AppCompatActivity {
 
     public void setupTermView() {
         setContentView(R.layout.detail_term);
+        this.setTitle("Term Details");
         db.open();
         Cursor c = db.getRow(dataTitle, whereValue);
         if (c.moveToFirst()) {
@@ -132,6 +147,7 @@ public class DetailActivity extends AppCompatActivity {
 
     public void setupCourseView() {
         setContentView(R.layout.detail_course);
+        this.setTitle("Course Details");
         db.open();
         Cursor c = db.getRow(dataTitle, whereValue);
         if (c.moveToFirst()) {
@@ -141,29 +157,64 @@ public class DetailActivity extends AppCompatActivity {
             end = (TextView) findViewById(R.id.end_date); end.setText(c.getString(3)); endTime = c.getString(3);
             TextView status = (TextView) findViewById(R.id.text_course_status); status.setText(c.getString(4));
             TextView notes = (TextView) findViewById(R.id.text_course_notes); notes.setText("Notes: "+c.getString(5));
+
+
+            // Format share action
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Course: "+c.getString(1)+" Start: "+c.getString(2)+" End: "+c.getString(3)+" Status: "+c.getString(4)+" Notes:"+c.getString(5));
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Notes for "+c.getString(1)+":"+c.getString(5));
         }
         db.close();
     }
 
+    public void setupMentorView() {
+        setContentView(R.layout.detail_mentor);
+        this.setTitle("Mentor Details");
+        db.open();
+        Cursor c = db.getRow(dataTitle, whereValue);
+        if (c.moveToFirst()) {
+            previousTitle = c.getString(1);
+            TextView name = (TextView) findViewById(R.id.text_mentor_name); name.setText(c.getString(1));
+            TextView phone = (TextView) findViewById(R.id.text_phone); phone.setText(c.getString(2));
+            TextView email = (TextView) findViewById(R.id.text_email); email.setText(c.getString(3));;
+
+
+            // Format share action
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Course: "+c.getString(1)+" Start: "+c.getString(2)+" End: "+c.getString(3)+" Status: "+c.getString(4)+" Notes:"+c.getString(5));
+            //shareIntent.setType("text/plain");
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Notes for "+c.getString(1)+":"+c.getString(5));
+        }
+        db.close();
+    }
+
+    public void setupAssessmentView() {
+
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.share_menu, menu);
-        // Locate MenuItem with ShareActionProvider
-        MenuItem item = menu.findItem(R.id.menu_item_share);
 
-        // Fetch and store ShareActionProvider
-       // mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+        if(dataTitle.equals("courses")||dataTitle.equals("assessments")) {
+            getMenuInflater().inflate(R.menu.share_menu, menu);
+            MenuItem item = menu.findItem(R.id.menu_item_share);
 
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-        // Set history different from the default before getting the action
-        // view since a call to MenuItemCompat.getActionView() calls
-        // ActionProvider.onCreateActionView() which uses the backing file name. Omit this
-        // line if using the default share history file is desired.
-        //mShareActionProvider.setShareHistoryFileName("custom_share_history.xml");
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+            mShareActionProvider.setOnShareTargetSelectedListener(this);
 
-        // Return true to display menu
-        return true;
+
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+       // Return true to display menu
+
+        return(super.onCreateOptionsMenu(menu));
+        //return true;
+    }
+
+    // Call to update the share intent
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
     }
 
     @Override
@@ -178,8 +229,23 @@ public class DetailActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+
+
+
         return super.onOptionsItemSelected(item);
     }
 
 
+    @Override
+    public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+
+      //  Toast.makeText(this, intent.getComponent().toString(),
+      //          Toast.LENGTH_LONG).show();
+
+        return false;
+    }
 }

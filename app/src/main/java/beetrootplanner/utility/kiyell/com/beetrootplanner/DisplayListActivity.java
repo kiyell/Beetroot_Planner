@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -704,9 +705,9 @@ public class DisplayListActivity extends ListActivity {
                     break;
                 case "courses": intentExt = new String[] {"courses", "course_id", String.valueOf(e.rowid), " "};//{"mentors", "mentor_id", String.valueOf(e.rowid), " in course "}; // {"assessments", "assessment_id", String.valueOf(e.rowid), " in course "};
                     break;
-                case "assessments": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " in course "};
+                case "assessments": intentExt = new String[] {"assessments", "assessment_id", String.valueOf(e.rowid), " "};//{"mentors", "mentor_id", String.valueOf(e.rowid), " in course "};
                     break;
-                case "mentors": intentExt = new String[] {"terms", "term_id", String.valueOf(e.rowid), " in course "};
+                case "mentors": intentExt = new String[] {"mentors", "mentor_id", String.valueOf(e.rowid), " "};//{"terms", "term_id", String.valueOf(e.rowid), " in course "};
                     break;
             }
 
