@@ -88,6 +88,7 @@ public class DetailActivity extends AppCompatActivity  implements
         intent.putExtra("where_pk",intentExt[1]);
         intent.putExtra("where_value", intentExt[2]);
         intent.putExtra("header_sub", intentExt[3]);
+        finish();
         startActivity(intent);
     }
 
@@ -124,7 +125,13 @@ public class DetailActivity extends AppCompatActivity  implements
             }
             intent.putExtra("beginTime", (formatSdf.getTime()));
             intent.putExtra("allDay", true);
-            intent.putExtra("title", eventTitle+" ends");
+            if (dataTitle.equals("assessments")) {
+                intent.putExtra("title", eventTitle+" is due");
+            } else {
+                intent.putExtra("title", eventTitle+" ends");
+            }
+
+
             startActivity(intent);
         } else {
             Toast.makeText(this.getBaseContext(), "Unable to set alert, no date value available", Toast.LENGTH_LONG).show();
@@ -188,7 +195,24 @@ public class DetailActivity extends AppCompatActivity  implements
     }
 
     public void setupAssessmentView() {
+        setContentView(R.layout.detail_assessment);
+        this.setTitle("Assessment Details");
 
+        db.open();
+        Cursor c = db.getRow(dataTitle, whereValue);
+        if (c.moveToFirst()) {
+            previousTitle = c.getString(1);
+            TextView assessmentName = (TextView) findViewById(R.id.text_assessment_name); assessmentName.setText(c.getString(1)); eventTitle = c.getString(1);
+            TextView type = (TextView) findViewById(R.id.text_assessment_type); type.setText(c.getString(2));
+            TextView dueDate = (TextView) findViewById(R.id.end_date); dueDate.setText(c.getString(3)); endTime = c.getString(3);
+
+
+            // Format share action
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Course: "+c.getString(1)+" Start: "+c.getString(2)+" End: "+c.getString(3)+" Status: "+c.getString(4)+" Notes:"+c.getString(5));
+            //shareIntent.setType("text/plain");
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Notes for "+c.getString(1)+":"+c.getString(5));
+        }
+        db.close();
     }
 
     @Override
