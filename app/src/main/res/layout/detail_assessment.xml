@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/photo_note_assessment"
                 android:src="@android:drawable/ic_menu_report_image"
-                android:scaleType="centerInside"
+                android:scaleType="center"
              /> <!--    android:adjustViewBounds="true" // use when adding an actual image -->
 
 

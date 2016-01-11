@@ -2,18 +2,31 @@ package beetrootplanner.utility.kiyell.com.beetrootplanner;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.CalendarContract;
+import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ShareActionProvider;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,6 +48,10 @@ public class DetailActivity extends AppCompatActivity  implements
     private ShareActionProvider mShareActionProvider;
     private Intent shareIntent=new Intent(Intent.ACTION_SEND);
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_TAKE_PHOTO = 1;
+    String mCurrentPhotoPath;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +61,7 @@ public class DetailActivity extends AppCompatActivity  implements
         db = new DBAdapter(this);
         beginTime = "invalid";
         endTime = "invalid";
+        mCurrentPhotoPath = "no photo path set";
 
         switch (dataTitle) {
             case "terms": setupTermView();
@@ -147,7 +165,8 @@ public class DetailActivity extends AppCompatActivity  implements
             previousTitle = c.getString(1);
             title = (TextView) findViewById(R.id.text_term_name); title.setText(c.getString(1)); eventTitle = c.getString(1);
             start = (TextView) findViewById(R.id.start_date); start.setText(c.getString(2)); beginTime = c.getString(2);
-            end = (TextView) findViewById(R.id.end_date); end.setText(c.getString(3)); endTime = c.getString(3);
+            end = (TextView) findViewById(R.id.end_date);
+            end.setText(c.getString(3)); endTime = c.getString(3);
         }
         db.close();
     }
@@ -189,7 +208,7 @@ public class DetailActivity extends AppCompatActivity  implements
             // Format share action
             //shareIntent.putExtra(Intent.EXTRA_TEXT, "Course: "+c.getString(1)+" Start: "+c.getString(2)+" End: "+c.getString(3)+" Status: "+c.getString(4)+" Notes:"+c.getString(5));
             //shareIntent.setType("text/plain");
-            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Notes for "+c.getString(1)+":"+c.getString(5));
+            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Mento Notes for "+c.getString(1)+"");
         }
         db.close();
     }
@@ -205,12 +224,52 @@ public class DetailActivity extends AppCompatActivity  implements
             TextView assessmentName = (TextView) findViewById(R.id.text_assessment_name); assessmentName.setText(c.getString(1)); eventTitle = c.getString(1);
             TextView type = (TextView) findViewById(R.id.text_assessment_type); type.setText(c.getString(2));
             TextView dueDate = (TextView) findViewById(R.id.end_date); dueDate.setText(c.getString(3)); endTime = c.getString(3);
+            ImageView iv = (ImageView) findViewById(R.id.photo_note_assessment);
+
+            mCurrentPhotoPath = c.getString(4);
+            File imageFile = new File(mCurrentPhotoPath);
+            if(imageFile.exists()) {
+                Toast.makeText(this, "I see the image file path at "+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+
+                Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                iv.setImageBitmap(myBitmap);
+
+                shareIntent.setType("image/jpeg");
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                myBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+
+                File f = new File(Environment.getExternalStorageDirectory().getPath() + File.separator +"AssessmentShareImage.jpg");
+
+                FileOutputStream fo = null;
+                try {
+                    f.createNewFile();
+                    fo = new FileOutputStream(f);
+                    fo.write(bytes.toByteArray());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+
+                    try {
+                        fo.close();
+                    } catch (Exception e) {
+                        //Catch fo close
+                    }
+
+                }
+                Toast.makeText(this, "uri: " + Uri.fromFile(f).toString(), Toast.LENGTH_LONG).show();
+                shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+                //startActivity(Intent.createChooser(shareIntent, "Share Image"));
+                //shareIntent.putExtra(Intent.EXTRA_TEXT, "Assessment Notes for " + c.getString(1) + "");
+
+            } else {
+                Toast.makeText(this, "I don't see any image file path, checked:"+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+            }
+
 
 
             // Format share action
             //shareIntent.putExtra(Intent.EXTRA_TEXT, "Course: "+c.getString(1)+" Start: "+c.getString(2)+" End: "+c.getString(3)+" Status: "+c.getString(4)+" Notes:"+c.getString(5));
-            //shareIntent.setType("text/plain");
-            //shareIntent.putExtra(Intent.EXTRA_TEXT, "Notes for "+c.getString(1)+":"+c.getString(5));
+
         }
         db.close();
     }
@@ -271,5 +330,95 @@ public class DetailActivity extends AppCompatActivity  implements
       //          Toast.LENGTH_LONG).show();
 
         return false;
+    }
+
+    public void processImage(View v) {
+
+        // if its the add button then create an image, save the file path, reload imageview with that filepath
+        if (v.getId() == R.id.button_add_image) {
+
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // Ensure that there's a camera activity to handle the intent
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                // Create the File where the photo should go
+                File photoFile = null;
+                try {
+                    photoFile = createImageFile();
+                } catch (IOException ex) {
+                    // Error occurred while creating the File
+                    Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+                }
+                // Continue only if the File was successfully created
+                if (photoFile != null) {
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                            Uri.fromFile(photoFile));
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                }
+            }
+
+        }
+
+        // if its the remove button then delete, reload imageview with blank image
+        if (v.getId() == R.id.button_remove_image) {
+            Toast.makeText(this, "Deleting: "+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+
+            TextView assessmentTitle = (TextView) findViewById(R.id.text_assessment_name);
+            TextView assessmentType = (TextView) findViewById(R.id.text_assessment_type);
+            TextView assessmentDueDate = (TextView) findViewById(R.id.end_date);
+            ImageView iv = (ImageView) findViewById(R.id.photo_note_assessment);
+            iv.setVisibility(View.GONE);
+
+            File imageFile = new File(mCurrentPhotoPath);
+            if(imageFile.exists()) {
+                imageFile.delete();
+            }
+
+
+            db.open();
+            long assessment_id = db.updateAssessment(assessmentTitle.getText().toString(), assessmentType.getText().toString(), assessmentDueDate.getText().toString(), "", whereValue);
+            db.close();
+            mCurrentPhotoPath = "n/a";
+           // recreate();
+        }
+
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "PhotoNoteJPEG_" + timeStamp + "_";
+        File storageDir = this.getExternalFilesDir(null);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+      //  mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+
+        mCurrentPhotoPath =  image.getAbsolutePath();
+        return image;
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+    //       Bundle extras = data.getExtras();
+    //        Bitmap imageBitmap = (Bitmap) extras.get("data");
+    //        ImageView photoNote = (ImageView) findViewById(R.id.photo_note_assessment);
+
+            Toast.makeText(this, mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+
+            TextView assessmentTitle = (TextView) findViewById(R.id.text_assessment_name);
+            TextView assessmentType = (TextView) findViewById(R.id.text_assessment_type);
+            TextView assessmentDueDate = (TextView) findViewById(R.id.end_date);
+
+            db.open();
+            long assessment_id = db.updateAssessment(assessmentTitle.getText().toString(), assessmentType.getText().toString(), assessmentDueDate.getText().toString(), mCurrentPhotoPath, whereValue);
+            db.close();
+            recreate();
+        }
     }
 }
