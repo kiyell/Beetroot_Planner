@@ -543,7 +543,7 @@ public class DisplayListActivity extends ListActivity {
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
                 long mentor_id = db.addMentor(mentorName.getText().toString(), mentorPhone.getText().toString(), mentorEmail.getText().toString(), whereValue);
-                Toast.makeText(d.getContext(), "mentor_id created is: " + mentor_id, Toast.LENGTH_LONG).show();
+                //COMMENTDEBUG  Toast.makeText(d.getContext(), "mentor_id created is: " + mentor_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
             }
