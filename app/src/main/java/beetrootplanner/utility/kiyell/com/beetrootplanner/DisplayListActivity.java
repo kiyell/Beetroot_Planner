@@ -417,7 +417,7 @@ public class DisplayListActivity extends ListActivity {
                 output.append(assessmentTitle.getText() + " ");
                 output.append(assessmentType.getSelectedItem().toString() + " ");
                 output.append(assessmentDueDate.getText() + " ");
-                output.append(" WHERE value is " + whereValue);
+                //COMMENTDEBUG  output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
@@ -492,7 +492,7 @@ public class DisplayListActivity extends ListActivity {
                 output.append(assessmentTitle.getText() + " ");
                 output.append(assessmentType.getSelectedItem().toString() + " ");
                 output.append(assessmentDueDate.getText() + " ");
-                output.append(" WHERE value is " + whereValue);
+                //COMMENTDEBUG output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
@@ -537,7 +537,7 @@ public class DisplayListActivity extends ListActivity {
                 output.append(mentorName.getText() + " ");
                 output.append(mentorPhone.getText() + " ");
                 output.append(mentorEmail.getText() + " ");
-                output.append(" WHERE value is " + whereValue);
+                //COMMENTDEBUG  output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
@@ -602,7 +602,7 @@ public class DisplayListActivity extends ListActivity {
                 output.append(mentorName.getText() + " ");
                 output.append(mentorPhone.getText() + " ");
                 output.append(mentorEmail.getText() + " ");
-                output.append(" WHERE value is " + whereValue);
+                //COMMENTDEBUG  output.append(" WHERE value is " + whereValue);
 
 
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
