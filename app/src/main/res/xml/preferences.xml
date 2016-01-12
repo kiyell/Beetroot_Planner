@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <PreferenceCategory
+        android:title="General Settings"
+        android:key="pref_key_general_settings">
+    <CheckBoxPreference
+        android:key="pref__key_calendar"
+        android:title="Use Calendar"
+        android:summary="Use the calendar for scheduling events rather than the notification system"
+        android:defaultValue="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Database Settings"
+        android:key="pref_key_general_settings">
+        <Preference
+            android:id="@+id/settings_delete_db"
+            android:key="deleteDB"
+            android:summary="This will erase the current database"
+            android:title="Delete Database" />
+        <Preference
+            android:id="@+id/settings_create_db"
+            android:key="createDB"
+            android:summary="This will create an example database that contains terms, courses, mentors, and assessments"
+            android:title="Create Example Database" />
+        </PreferenceCategory>
 </PreferenceScreen>

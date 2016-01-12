@@ -13,12 +13,8 @@ import android.widget.Toast;
 
 public class DBAdapter {
 
-    static final String KEY_ROWID = "_id";
-    static final String KEY_NAME = "name";
-    static final String KEY_EMAIL = "email";
     static final String TAG = "DBAdapter";
     static final String DATABASE_NAME = "MyDB";
-    static final String DATABASE_TABLE = "contacts";
     static final int DATABASE_VERSION = 2;
     static final String TERMS_TABLE_CREATE =
             "create table terms (term_id integer primary key autoincrement, term_title text not null, term_start text not null, term_end text not null);";
@@ -72,6 +68,8 @@ public class DBAdapter {
             onCreate(db);
         }
 
+
+
         @Override
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
@@ -81,6 +79,17 @@ public class DBAdapter {
             }
         }
     }
+    public void deleteTableInfo() {
+
+
+        db.delete("courses",null,null);
+        db.delete("assessments",null,null);
+        db.delete("mentors",null,null);
+        db.delete("terms", null, null);
+
+    }
+
+
     //---opens the database---
     public DBAdapter open() throws SQLException
     {
@@ -170,7 +179,10 @@ public class DBAdapter {
         updateValues.put("assessment_title", ttl);
         updateValues.put("assessment_due", due);
         updateValues.put("assessment_type", typ);
-        updateValues.put("assessment_photo_note", pht);
+        if (!pht.equals("EDIT")) {
+            updateValues.put("assessment_photo_note", pht);
+        }
+
         return db.update("assessments", updateValues, "assessment_id = " + rowid, null);
     }
 
@@ -184,7 +196,7 @@ public class DBAdapter {
     //-- Retrieve Term Data
     public Cursor getAllTerms()
     {
-        return db.query("terms", new String[] {"term_id", "term_title",
+        return db.query("terms", new String[]{"term_id", "term_title",
                 "term_start", "term_end"}, null, null, null, null, null);
     }
 
@@ -204,6 +216,31 @@ public class DBAdapter {
         }
 
         return null;
+    }
+
+    public Cursor getAll(String dt)
+    {
+        if (dt.equals("courses")) {
+            return db.query("courses", new String[] {"course_id", "course_title",
+                    "course_start", "course_end", "course_status", "course_notes", "term_id"}, null, null, null, null, null); //wpk+" = "+wv
+        }
+        if (dt.equals("assessments")) {
+            return db.query("assessments", new String[] {"assessment_id", "assessment_title", "assessment_type",
+                    "assessment_due", "assessment_photo_note", "course_id"}, null, null, null, null, null); //wpk+" = "+wv
+        }
+        if (dt.equals("mentors")) {
+            return db.query("mentors", new String[] {"mentor_id", "mentor_name", "mentor_phone",
+                    "mentor_email", "course_id"}, null, null, null, null, null); //wpk+" = "+wv
+        }
+
+        return null;
+    }
+
+    public Cursor getCourseProgress(String prog) {
+
+        return db.query("courses", new String[] {"course_id", "course_title",
+                "course_start", "course_end", "course_status", "course_notes", "term_id"}, "course_status = "+prog, null, null, null, null);
+
     }
 
     public Cursor getRow(String dt, String wh) {

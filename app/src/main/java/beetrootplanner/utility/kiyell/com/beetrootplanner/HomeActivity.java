@@ -1,10 +1,11 @@
 package beetrootplanner.utility.kiyell.com.beetrootplanner;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -30,6 +31,8 @@ public class HomeActivity extends AppCompatActivity {
             }
         }); */
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
 
     }
 
@@ -50,6 +53,42 @@ public class HomeActivity extends AppCompatActivity {
         intent.putExtra("where_pk","term_id");
         intent.putExtra("where_value","");
         startActivity(intent);
+    }
+
+    public void deleteAlarms(View v) {
+        AlarmManager am = (AlarmManager) getSystemService(getApplicationContext().ALARM_SERVICE);
+        Intent i = new Intent(getApplicationContext(),AlarmNotifier.class);
+        Intent notificationIntent = new Intent(this, AlarmNotifier.class);
+        notificationIntent.putExtra(AlarmNotifier.NOTIFICATION_ID, 1);
+        PendingIntent p = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.cancel(p);
+        p.cancel();
+
+
+        Toast.makeText(this.getBaseContext(), "All Notification Alerts have been deleted!", Toast.LENGTH_LONG).show();
+    }
+
+    public void viewProgress(View v) {
+        DBAdapter db = new DBAdapter(this);
+
+        db.open(); // Get count of courses that have progress
+
+        Cursor c = null; Cursor c2 = null;
+        c = db.getCourseProgress("'COMPLETED'");
+        c2 = db.getAll("courses");
+
+        if (c.moveToFirst() && c2.moveToFirst())
+        {
+            Toast.makeText(this.getBaseContext(), c.getCount()+" Course(s) have been completed out of "+c2.getCount(), Toast.LENGTH_LONG).show();
+        } else {
+            // no courses found
+            Toast.makeText(this.getBaseContext(), "No courses have been completed", Toast.LENGTH_LONG).show();
+        }
+
+        db.close();
+
+
+
     }
 
     @Override

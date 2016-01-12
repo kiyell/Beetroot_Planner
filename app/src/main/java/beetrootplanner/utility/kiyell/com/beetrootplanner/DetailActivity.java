@@ -1,11 +1,18 @@
 package beetrootplanner.utility.kiyell.com.beetrootplanner;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
 import android.support.v4.app.NavUtils;
@@ -13,13 +20,10 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ShareActionProvider;
-import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+
+
 public class DetailActivity extends AppCompatActivity  implements
         ShareActionProvider.OnShareTargetSelectedListener{
 
@@ -41,7 +47,6 @@ public class DetailActivity extends AppCompatActivity  implements
     String previousTitle;
 
     String[] intentExt;
-    ArrayList<String> results = new ArrayList<>();
     DBAdapter db;
     TextView title,start, end;
     String beginTime, endTime, eventTitle;
@@ -51,6 +56,9 @@ public class DetailActivity extends AppCompatActivity  implements
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_TAKE_PHOTO = 1;
     String mCurrentPhotoPath;
+
+    SharedPreferences sharedPref;
+    Boolean useCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +81,8 @@ public class DetailActivity extends AppCompatActivity  implements
             case "mentors": setupMentorView();
                 break;
         }
-      //  this.getSupportActionBar().setHomeButtonEnabled(true);
-      //  this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        useCalendar = sharedPref.getBoolean("pref__key_calendar", false);
     }
 
     public void openList(View v) {
@@ -112,7 +120,9 @@ public class DetailActivity extends AppCompatActivity  implements
 
     public void setAlertStart (View v) {
         if (!beginTime.equals("")) {
-            Calendar cal = Calendar.getInstance();
+
+            if (useCalendar) {
+
             Intent intent = new Intent(Intent.ACTION_EDIT);
             intent.setData(CalendarContract.Events.CONTENT_URI);
             Date formatSdf = null;
@@ -125,32 +135,88 @@ public class DetailActivity extends AppCompatActivity  implements
             intent.putExtra("allDay", true);
             intent.putExtra("title", eventTitle+" starts");
             startActivity(intent);
+
+            } else {
+                Date formatSdf = null;
+                try {
+                    formatSdf = new SimpleDateFormat("MMMM dd yyyy").parse(beginTime);
+                } catch (Exception e) {
+                    Toast.makeText(this.getBaseContext(), "Unable to parse (MMMM dd yyyy)", Toast.LENGTH_LONG).show();
+                }
+
+                scheduleNotification(getNotification(eventTitle+" starts"), formatSdf.getTime());
+            }
+
         } else {
             Toast.makeText(this.getBaseContext(), "Unable to set alert, no date value available", Toast.LENGTH_LONG).show();
         }
     }
 
+    private void scheduleNotification(Notification notification, long future) {
+
+        Calendar cal = Calendar.getInstance();
+
+        Intent notificationIntent = new Intent(this, AlarmNotifier.class);
+        notificationIntent.putExtra(AlarmNotifier.NOTIFICATION_ID, 1);
+        notificationIntent.putExtra(AlarmNotifier.NOTIFICATION, notification);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        long futureInMillis = SystemClock.elapsedRealtime() + future - cal.getTimeInMillis();
+        if (futureInMillis < 0) {
+            Toast.makeText(this.getBaseContext(), "Unable to set alert, the date has already arrived.", Toast.LENGTH_LONG).show();
+        } else {
+            AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+
+            Toast.makeText(this.getBaseContext(), "Notification Alert has been set", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Beetroot Planner");
+        builder.setContentText(content);
+        builder.setSmallIcon(android.R.drawable.stat_notify_error);
+        return builder.getNotification();
+    }
+
     public void setAlertEnd (View v) {
         if (!endTime.equals("")) {
-            Calendar cal = Calendar.getInstance();
-            Intent intent = new Intent(Intent.ACTION_EDIT);
-            intent.setData(CalendarContract.Events.CONTENT_URI);
-            Date formatSdf = null;
-            try {
-                formatSdf = new SimpleDateFormat("MMMM dd yyyy").parse(endTime);
-            } catch (Exception e) {
-                Toast.makeText(this.getBaseContext(), "Unable to parse (MMMM dd yyyy)", Toast.LENGTH_LONG).show();
-            }
-            intent.putExtra("beginTime", (formatSdf.getTime()));
-            intent.putExtra("allDay", true);
-            if (dataTitle.equals("assessments")) {
-                intent.putExtra("title", eventTitle+" is due");
-            } else {
-                intent.putExtra("title", eventTitle+" ends");
+
+            if (useCalendar) {
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setData(CalendarContract.Events.CONTENT_URI);
+                Date formatSdf = null;
+                try {
+                    formatSdf = new SimpleDateFormat("MMMM dd yyyy").parse(endTime);
+                } catch (Exception e) {
+                    Toast.makeText(this.getBaseContext(), "Unable to parse (MMMM dd yyyy)", Toast.LENGTH_LONG).show();
+                }
+                intent.putExtra("beginTime", (formatSdf.getTime()));
+                intent.putExtra("allDay", true);
+                if (dataTitle.equals("assessments")) {
+                    intent.putExtra("title", eventTitle + " is due");
+                } else {
+                    intent.putExtra("title", eventTitle + " ends");
+                }
+                startActivity(intent);
+            } else
+            {
+                Date formatSdf = null;
+                try {
+                    formatSdf = new SimpleDateFormat("MMMM dd yyyy").parse(endTime);
+                } catch (Exception e) {
+                    Toast.makeText(this.getBaseContext(), "Unable to parse (MMMM dd yyyy)", Toast.LENGTH_LONG).show();
+                }
+                String ending = " ends";
+                if (dataTitle.equals("assessments")) {
+                    ending = " is due";
+                }
+                scheduleNotification(getNotification(eventTitle+ending), formatSdf.getTime());
             }
 
-
-            startActivity(intent);
         } else {
             Toast.makeText(this.getBaseContext(), "Unable to set alert, no date value available", Toast.LENGTH_LONG).show();
         }
@@ -229,7 +295,7 @@ public class DetailActivity extends AppCompatActivity  implements
             mCurrentPhotoPath = c.getString(4);
             File imageFile = new File(mCurrentPhotoPath);
             if(imageFile.exists()) {
-                Toast.makeText(this, "I see the image file path at "+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+                //DEBUGCOMMENT Toast.makeText(this, "I see the image file path at "+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
 
                 Bitmap myBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
                 iv.setImageBitmap(myBitmap);
@@ -256,13 +322,13 @@ public class DetailActivity extends AppCompatActivity  implements
                     }
 
                 }
-                Toast.makeText(this, "uri: " + Uri.fromFile(f).toString(), Toast.LENGTH_LONG).show();
+                //DEBUGCOMMENT Toast.makeText(this, "uri: " + Uri.fromFile(f).toString(), Toast.LENGTH_LONG).show();
                 shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
                 //startActivity(Intent.createChooser(shareIntent, "Share Image"));
                 //shareIntent.putExtra(Intent.EXTRA_TEXT, "Assessment Notes for " + c.getString(1) + "");
 
             } else {
-                Toast.makeText(this, "I don't see any image file path, checked:"+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+                //DEBUGCOMMENT  Toast.makeText(this, "I don't see any image file path, checked:"+mCurrentPhotoPath, Toast.LENGTH_LONG).show();
             }
 
 
@@ -409,7 +475,7 @@ public class DetailActivity extends AppCompatActivity  implements
     //        Bitmap imageBitmap = (Bitmap) extras.get("data");
     //        ImageView photoNote = (ImageView) findViewById(R.id.photo_note_assessment);
 
-            Toast.makeText(this, mCurrentPhotoPath, Toast.LENGTH_LONG).show();
+            //DEBUGCOMMENT Toast.makeText(this, mCurrentPhotoPath, Toast.LENGTH_LONG).show();
 
             TextView assessmentTitle = (TextView) findViewById(R.id.text_assessment_name);
             TextView assessmentType = (TextView) findViewById(R.id.text_assessment_type);

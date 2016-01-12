@@ -31,7 +31,6 @@ import java.util.Date;
 public class DisplayListActivity extends ListActivity {
 
 
-    ArrayList<String> results = new ArrayList<>();
     ArrayList<DBListEntry> dblist = new ArrayList<>();
     DBAdapter db;
 
@@ -92,7 +91,8 @@ public class DisplayListActivity extends ListActivity {
         if (c.moveToFirst())
         {
             do {
-                dblist.add(new DBListEntry(c.getString(1)+" : "+c.getString(2)+" - "+c.getString(3),c.getLong(0)));
+                //DEBUGCOMMENT dblist.add(new DBListEntry(c.getString(1)+" : "+c.getString(2)+" - "+c.getString(3),c.getLong(0)));
+                dblist.add(new DBListEntry(c.getString(1),c.getLong(0)));
             } while (c.moveToNext());
         }
         db.close();
@@ -269,13 +269,13 @@ public class DisplayListActivity extends ListActivity {
                 output.append(courseStart.getText() + " ");
                 output.append(courseEnd.getText() + " ");
                 output.append(courseStatus.getSelectedItem().toString() + " ");
-                output.append(" WHERE value is " + whereValue);
+                //DEBUGCOMMENT output.append(" WHERE value is " + whereValue);
 
-
+                //DEBUGCOMMENT
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
                 long course_id = db.addCourse(courseTitle.getText().toString(), courseStart.getText().toString(), courseEnd.getText().toString(), courseStatus.getSelectedItem().toString(), courseNotes.getText().toString(), whereValue);
-                Toast.makeText(d.getContext(), "course_id created is: " + course_id, Toast.LENGTH_LONG).show();
+                //DEBUGCOMMENT Toast.makeText(d.getContext(), "course_id created is: " + course_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
             }
@@ -497,8 +497,8 @@ public class DisplayListActivity extends ListActivity {
 
                 Toast.makeText(d.getContext(), "Updating the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
-                long assessment_id = db.updateAssessment(assessmentTitle.getText().toString(), assessmentType.getSelectedItem().toString(), assessmentDueDate.getText().toString(), "N/A", where);
-                Toast.makeText(d.getContext(), "assessment_id updated is: " + assessment_id, Toast.LENGTH_LONG).show();
+                long assessment_id = db.updateAssessment(assessmentTitle.getText().toString(), assessmentType.getSelectedItem().toString(), assessmentDueDate.getText().toString(), "EDIT", where);
+                //COMMENTDEBUG  Toast.makeText(d.getContext(), "assessment_id updated is: " + assessment_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
                 setMode(VIEW_MODE);
@@ -575,7 +575,7 @@ public class DisplayListActivity extends ListActivity {
         db.open();
         Cursor result = db.getRow("mentors",where);
 
-        Toast.makeText(this.getBaseContext(), "editor where is " + where, Toast.LENGTH_LONG).show();
+        //COMMENTDEBUG Toast.makeText(this.getBaseContext(), "editor where is " + where, Toast.LENGTH_LONG).show();
 
 
         if (result.moveToFirst()) {
@@ -608,7 +608,7 @@ public class DisplayListActivity extends ListActivity {
                 Toast.makeText(d.getContext(), "Inserting the data: " + output, Toast.LENGTH_LONG).show();
                 db.open();
                 long mentor_id = db.updateMentor(mentorName.getText().toString(), mentorPhone.getText().toString(), mentorEmail.getText().toString(), where);
-                Toast.makeText(d.getContext(), "mentor_id update is: " + mentor_id, Toast.LENGTH_LONG).show();
+                //COMMENTDEBUG Toast.makeText(d.getContext(), "mentor_id update is: " + mentor_id, Toast.LENGTH_LONG).show();
                 db.close();
                 populateListFromSql();
                 setMode(VIEW_MODE);

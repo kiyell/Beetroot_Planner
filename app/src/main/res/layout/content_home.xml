@@ -15,8 +15,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="&quot;Welcome to Beetroot Planner, The ultimate school organizer!"
-        android:id="@+id/textView" />
+        android:text="&quot;Welcome to Beetroot Planner, The ultimate school organizer! You can delete the database or prepopulate the database in the settings screen which you can access using the action bar."
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -28,5 +30,23 @@
         android:textSize="50dp"
         android:nestedScrollingEnabled="false"
         android:onClick="startListActivity" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete Alarms"
+        android:id="@+id/button_delete_alarms"
+        android:layout_below="@+id/button_currentProgress"
+        android:layout_centerHorizontal="true"
+        android:onClick="deleteAlarms"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current Progress"
+        android:id="@+id/button_currentProgress"
+        android:layout_below="@+id/button_viewTerms"
+        android:layout_centerHorizontal="true"
+        android:onClick="viewProgress"/>
 
 </RelativeLayout>
