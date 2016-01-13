@@ -21,7 +21,7 @@
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:shrinkColumns="*"
+            android:shrinkColumns="2,3"
             android:stretchColumns="*">
             <TableRow
                 android:layout_width="fill_parent"
@@ -107,6 +107,12 @@
                 android:id="@+id/button_add_image"
                 android:text="Insert Photo Note"
                 android:onClick="processImage"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/button_view_image"
+                android:text="Open Photo Viewer"
+                android:onClick="openImage"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

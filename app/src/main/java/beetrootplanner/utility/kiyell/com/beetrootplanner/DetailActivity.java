@@ -182,6 +182,20 @@ public class DetailActivity extends AppCompatActivity  implements
         return builder.getNotification();
     }
 
+    public void openImage(View v) {
+
+        if (!mCurrentPhotoPath.equals("N/A")) {
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(new File(mCurrentPhotoPath)), "image/png");
+            startActivity(intent);
+
+        } else {
+            Toast.makeText(this.getBaseContext(), "No image available", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
     public void setAlertEnd (View v) {
         if (!endTime.equals("")) {
 

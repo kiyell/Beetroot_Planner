@@ -20,7 +20,7 @@
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:shrinkColumns="*"
+            android:shrinkColumns="2,3"
             android:stretchColumns="*">
             <TableRow
                 android:layout_width="fill_parent"
