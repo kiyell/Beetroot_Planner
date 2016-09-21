@@ -2,4 +2,4 @@
 
 This was done as an assignment for school. It organizes terms, classes, and assignments. All information is saved to the internal sql datastore.
 
-STUDENT ID IS 473758
+473758
